@@ -1,0 +1,2718 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Auto 3D Game - Bass Boost Edition</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #111;
+            font-family: sans-serif;
+        }
+
+        #ui {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: white;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        #crosshair {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 4px;
+            height: 4px;
+            background: white;
+            border-radius: 50%;
+            pointer-events: none;
+            display: none;
+        }
+
+        #musicMenu {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            padding: 30px;
+            border-radius: 15px;
+            border: 2px solid #00ff88;
+            color: white;
+            display: none;
+            min-width: 400px;
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.5);
+        }
+
+        #musicMenu h2 {
+            margin-top: 0;
+            color: #00ff88;
+            text-align: center;
+        }
+
+        #musicMenu input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 2px solid #00ff88;
+            border-radius: 5px;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        #musicMenu button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        #playBtn {
+            background: #00ff88;
+            color: black;
+            font-weight: bold;
+        }
+
+        #playBtn:hover {
+            background: #00cc6a;
+            transform: scale(1.05);
+        }
+
+        #stopBtn {
+            background: #ff4444;
+            color: white;
+        }
+
+        #stopBtn:hover {
+            background: #cc0000;
+        }
+
+        #closeBtn {
+            background: #666;
+            color: white;
+        }
+
+        #closeBtn:hover {
+            background: #888;
+        }
+
+        .musicStatus {
+            margin-top: 15px;
+            padding: 10px;
+            background: rgba(0, 255, 136, 0.1);
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .volumeControl {
+            margin: 15px 0;
+        }
+
+        .volumeControl label {
+            display: block;
+            margin-bottom: 5px;
+            color: #00ff88;
+        }
+
+        .volumeControl input[type="range"] {
+            width: 100%;
+        }
+
+        .bassIndicator {
+            margin-top: 10px;
+            padding: 8px;
+            background: rgba(255, 0, 100, 0.2);
+            border-radius: 5px;
+            text-align: center;
+            color: #ff0066;
+            font-weight: bold;
+        }
+
+        .loading {
+            display: inline-block;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        /* Login Menu */
+        #loginMenu {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.95);
+            padding: 40px;
+            border-radius: 20px;
+            border: 3px solid #00ff88;
+            color: white;
+            min-width: 500px;
+            box-shadow: 0 0 50px rgba(0, 255, 136, 0.7);
+            z-index: 1000;
+        }
+
+        #loginMenu h2 {
+            margin-top: 0;
+            color: #00ff88;
+            text-align: center;
+            font-size: 32px;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+        }
+
+        #loginMenu input {
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            border: 2px solid #00ff88;
+            border-radius: 10px;
+            background: rgba(0, 100, 50, 0.2);
+            color: white;
+            font-size: 18px;
+            box-sizing: border-box;
+            text-align: center;
+        }
+
+        #loginMenu input:focus {
+            outline: none;
+            border-color: #00ff00;
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.5);
+        }
+
+        #joinBtn {
+            padding: 15px 40px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #00ff88, #00cc6a);
+            color: black;
+            font-weight: bold;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        #joinBtn:hover {
+            background: linear-gradient(135deg, #00cc6a, #00aa55);
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(0, 255, 136, 0.5);
+        }
+
+        /* Players Panel */
+        #playersPanel {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #00ff88;
+            color: white;
+            min-width: 200px;
+            max-width: 300px;
+            max-height: 400px;
+            overflow-y: auto;
+            display: none;
+        }
+
+        #playersPanel h3 {
+            margin: 0 0 10px 0;
+            color: #00ff88;
+            text-align: center;
+            font-size: 16px;
+        }
+
+        .player-item {
+            background: rgba(0, 255, 136, 0.1);
+            padding: 8px;
+            margin: 5px 0;
+            border-radius: 5px;
+            border-left: 3px solid #00ff88;
+            font-size: 14px;
+        }
+
+        .player-item.self {
+            border-left-color: #ffaa00;
+            background: rgba(255, 170, 0, 0.1);
+        }
+
+        .player-name {
+            font-weight: bold;
+            color: #00ff88;
+        }
+
+        .player-item.self .player-name {
+            color: #ffaa00;
+        }
+
+        .player-status {
+            font-size: 11px;
+            color: #aaa;
+            margin-top: 3px;
+        }
+
+        /* Menú de Configuración Gráfica */
+        #graphicsMenu {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            border: 2px solid #00ff88;
+            color: white;
+            display: none;
+            min-width: 400px;
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.5);
+            z-index: 1001;
+        }
+
+        #graphicsMenu h2 {
+            margin-top: 0;
+            color: #00ff88;
+            text-align: center;
+        }
+
+        .quality-option {
+            background: rgba(0, 255, 136, 0.1);
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border: 2px solid #00ff88;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .quality-option:hover {
+            background: rgba(0, 255, 136, 0.2);
+            transform: scale(1.02);
+        }
+
+        .quality-option.selected {
+            background: rgba(0, 255, 136, 0.3);
+            border-color: #00ff00;
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.5);
+        }
+
+        .quality-option h3 {
+            margin: 0 0 5px 0;
+            color: #00ff88;
+        }
+
+        .quality-option p {
+            margin: 5px 0 0 0;
+            font-size: 12px;
+            color: #aaa;
+        }
+
+        #closeGraphicsBtn {
+            width: 100%;
+            padding: 10px;
+            margin-top: 15px;
+            border: none;
+            border-radius: 5px;
+            background: #666;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        #closeGraphicsBtn:hover {
+            background: #888;
+        }
+
+        /* Barra de Nitro - Minimalista */
+        #nitroBarContainer {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            display: none;
+            z-index: 100;
+            overflow: hidden;
+        }
+
+        #nitroBar {
+            width: 100%;
+            height: 100%;
+            background: #00ff88;
+            border-radius: 2px;
+            transition: width 0.1s linear;
+        }
+
+        #nitroBarContainer.active #nitroBar {
+            background: #00ff00;
+        }
+
+        /* Efecto de velocidad */
+        #speedEffect {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 999;
+        }
+
+        #speedEffect.active {
+            opacity: 1;
+        }
+
+        #speedEffect::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, transparent 0%, rgba(0, 255, 136, 0.1) 50%, rgba(0, 255, 136, 0.2) 100%);
+            animation: speedLines 0.1s linear infinite;
+        }
+
+        @keyframes speedLines {
+            0% {
+                transform: translateY(0) scaleY(1);
+            }
+            100% {
+                transform: translateY(-20px) scaleY(1.1);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="ui">
+        <b>Modo:</b> <span id="mode">Jugador</span><br>
+        <b>Controles Jugador:</b> WASD + Mouse<br>
+        <b>Controles Auto:</b> Flechas o WASD<br>
+        <b>Nitro:</b> Shift (mientras manejas)<br>
+        <b>Entrar/Salir Auto:</b> E o Enter<br>
+        <b>Música del Auto:</b> F<br>
+        <b>Configuración Gráfica:</b> L<br>
+        <span id="status">Cargando modelo...</span><br>
+        <span id="musicInfo" style="color: #00ff88;"></span>
+    </div>
+    <div id="crosshair"></div>
+
+    <!-- Login Menu -->
+    <div id="loginMenu">
+        <h2>🚗 Car Game Online 🌐</h2>
+        <p style="color: #aaa; text-align: center;">Ingresa tu nombre para jugar online</p>
+        <input type="text" id="playerName" placeholder="Tu nombre" maxlength="20">
+        <div style="text-align: center; margin-top: 15px;">
+            <button id="joinBtn">🎮 Unirse al Juego</button>
+        </div>
+        <div style="margin-top: 10px; font-size: 12px; color: #888; text-align: center;">
+            💡 ¡Juega con otros jugadores en tiempo real!
+        </div>
+    </div>
+
+    <!-- Players Online Panel -->
+    <div id="playersPanel">
+        <h3>👥 Jugadores Online</h3>
+        <div id="playersList"></div>
+    </div>
+
+    <!-- Menú de Configuración Gráfica -->
+    <div id="graphicsMenu">
+        <h2>⚙️ Configuración Gráfica</h2>
+        <div class="quality-option" data-quality="low">
+            <h3>🔧 Bajo</h3>
+            <p>Distancia de renderizado reducida • Optimizado para mejor rendimiento</p>
+        </div>
+        <div class="quality-option selected" data-quality="normal">
+            <h3>⚖️ Normal</h3>
+            <p>Configuración estándar • Balance entre calidad y rendimiento</p>
+        </div>
+        <div class="quality-option" data-quality="high">
+            <h3>✨ Alto</h3>
+            <p>Iluminación mejorada • Sol centrado • Máxima calidad visual</p>
+        </div>
+        <button id="closeGraphicsBtn">✖️ Cerrar</button>
+    </div>
+
+    <!-- Barra de Nitro -->
+    <div id="nitroBarContainer">
+        <div id="nitroBar"></div>
+    </div>
+
+    <!-- Efecto de Velocidad -->
+    <div id="speedEffect"></div>
+
+    <div id="musicMenu">
+        <h2>🎵 Music Car - Bass Boost Radio 🎵</h2>
+        <input type="text" id="musicUrl" placeholder="Pega aquí el link .mp3 de tu música (Discord, Drive, etc.)">
+        <div class="volumeControl">
+            <label>Volumen Máximo: <span id="volumeValue">100</span>%</label>
+            <input type="range" id="volumeSlider" min="0" max="100" value="100">
+        </div>
+        <div class="volumeControl">
+            <label>Sensibilidad Bass: <span id="bassValue">50</span>%</label>
+            <input type="range" id="bassSensitivity" min="0" max="100" value="50">
+        </div>
+        <div style="text-align: center;">
+            <button id="playBtn">▶️ Reproducir</button>
+            <button id="stopBtn">⏹️ Detener</button>
+            <button id="closeBtn">✖️ Cerrar</button>
+        </div>
+        <div class="musicStatus">
+            <span id="musicStatusText">No hay música cargada</span>
+        </div>
+        <div class="bassIndicator">
+            🔊 Bass Level: <span id="bassLevel">0</span>%
+        </div>
+        <div style="margin-top: 10px; font-size: 12px; color: #888;">
+            💡 Tip: El auto rebota con los bajos de la música 🚗💨
+        </div>
+    </div>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+        import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
+
+        // FIREBASE IMPORTS
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getDatabase, ref, set, get, update as dbUpdate, onValue, remove, onDisconnect } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCw0v9mVUpOO8HYYfHLhyzkgIMfoBljJcQ",
+            authDomain: "fortnite-8012b.firebaseapp.com",
+            databaseURL: "https://fortnite-8012b-default-rtdb.firebaseio.com",
+            projectId: "fortnite-8012b",
+            storageBucket: "fortnite-8012b.firebasestorage.app",
+            messagingSenderId: "862924450554",
+            appId: "1:862924450554:web:b01ab7f85afa7965c2f743",
+            measurementId: "G-8Q997GYMM2"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        // Variables de estado multiplayer
+        let currentPlayerId = null;
+        let currentPlayerName = null;
+        let otherPlayers = {};
+        let isOnline = false;
+        let lastUpdateTime = 0;
+        const UPDATE_INTERVAL = 300; // actualizar cada 300ms (reducido para menos lag)
+
+        // Para detección de cambios
+        let lastSentPosition = { x: 0, y: 0, z: 0, rotation: 0, mode: 'player' };
+        const MIN_POSITION_CHANGE = 0.5; // mínimo cambio de posición para enviar update
+        const MIN_ROTATION_CHANGE = 0.1; // mínimo cambio de rotación para enviar update
+
+        // Sistema de Audio DUAL - cada auto tiene su propio sistema de audio
+        let audioContext = null;
+
+        // Audio para Auto 1
+        let car1Audio = {
+            analyser: null,
+            dataArray: null,
+            audioSource: null,
+            audioBuffer: null,
+            maxVolume: 1.0,
+            isPlaying: false,
+            bassSensitivity: 0.5,
+            gainNode: null,
+            bounce: 0
+        };
+
+        // Audio para Auto 2 (Camión)
+        let car2Audio = {
+            analyser: null,
+            dataArray: null,
+            audioSource: null,
+            audioBuffer: null,
+            maxVolume: 1.0,
+            isPlaying: false,
+            bassSensitivity: 0.5,
+            gainNode: null,
+            bounce: 0
+        };
+        let car3Audio = {
+            analyser: null,
+            dataArray: null,
+            audioSource: null,
+            audioBuffer: null,
+            maxVolume: 1.0,
+            isPlaying: false,
+            bassSensitivity: 0.5,
+            gainNode: null,
+            bounce: 0
+        };
+        let car4Audio = {
+            analyser: null,
+            dataArray: null,
+            audioSource: null,
+            audioBuffer: null,
+            maxVolume: 1.0,
+            isPlaying: false,
+            bassSensitivity: 0.5,
+            gainNode: null,
+            bounce: 0
+        };
+          let car5Audio = {
+            analyser: null,
+            dataArray: null,
+            audioSource: null,
+            audioBuffer: null,
+            maxVolume: 1.0,
+            isPlaying: false,
+            bassSensitivity: 0.5,
+            gainNode: null,
+            bounce: 0
+        };
+          let car6Audio = {
+            analyser: null,
+            dataArray: null,
+            audioSource: null,
+            audioBuffer: null,
+            maxVolume: 1.0,
+            isPlaying: false,
+            bassSensitivity: 0.5,
+            gainNode: null,
+            bounce: 0
+        };
+        // ========================================
+        // 🚗 CONFIGURACIÓN DE AUTOS - ¡EDITA AQUÍ!
+        // ========================================
+        // Para agregar más autos, solo agrega objetos a este array:
+        const carsConfig = [
+            {
+                id: 'car1',
+                name: 'El azul',
+                modelUrl: 'https://raw.githubusercontent.com/yoyoyogogo/juego/main/music%20car%203d%20model%20(2).glb',
+                position: { x: 0, y: 1.7, z: -10 },
+                rotation: { x: 0, y: -Math.PI / 2, z: 0 }, // -90° para que mire adelante como en la versión anterior
+                scale: 1.5,
+                audio: car1Audio
+            },
+            {
+                id: 'car2',
+                name: 'La camiona',
+                modelUrl: 'https://raw.githubusercontent.com/yoyoyogogo/camion/main/Sin_nombre.glb',
+                position: { x: 5, y: 2.5, z: -10 },
+                rotation: { x: 0, y: -Math.PI / 2, z: 0 }, // -90° para que mire adelante
+                scale: 2.4,
+                audio: car2Audio
+            },
+            {
+                id: 'car3',
+                name: 'El neforepi',
+                modelUrl: 'https://raw.githubusercontent.com/yoyoyogogo/GTR-M3-/main/racing%20car%203d%20model.glb',
+                position: { x: 15, y: 1.5, z: -10 },
+                rotation: { x: 0, y: 0, z: 0 }, // Ajustado para que mire hacia adelante
+                scale: 1.5,
+                audio: car3Audio
+            },
+            {
+                id: 'car4',
+                name: 'El dorado',
+                modelUrl: 'https://raw.githubusercontent.com/yoyoyogogo/camionadora/main/speaker%20rig%20car%203d%20model.glb',
+                position: { x: 20, y: 3.5, z: -10 },
+                rotation: { x: 0, y: -Math.PI /2, z: 0 }, // Ajustado para que mire hacia adelante
+                scale: 2,
+                audio: car4Audio
+            },
+            {
+                id: 'car5',
+                name: 'El Pebeseta',
+                modelUrl: 'https://raw.githubusercontent.com/yoyoyogogo/pebeseta/main/stylized%20plant%203d%20model.glb',
+                position: { x: 25, y: 1.5, z: -10 },
+                rotation: { x: 0, y: -Math.PI /2, z: 0 }, // Ajustado para que mire hacia adelante
+                scale: 1,
+                audio: car5Audio
+            },
+            {
+                id: 'car6',
+                name: 'El azulbug',
+                modelUrl: 'https://raw.githubusercontent.com/yoyoyogogo/otrocar/main/rooftop%20speaker%20car%203d%20model.glb',
+                position: { x: 30, y: 3.5, z: -10 },
+                rotation: { x: 0, y: -Math.PI /2, z: 0 }, // Ajustado para que mire hacia adelante
+                scale: 2,
+                audio: car6Audio
+            }
+            // Para agregar más autos, copia y pega este bloque:
+            // {
+            //     id: 'car3',
+            //     name: 'Auto 3',
+            //     modelUrl: 'URL_DEL_MODELO.glb',
+            //     position: { x: 30, y: 0, z: -10 },
+            //     rotation: { x: 0, y: 0, z: 0 },
+            //     scale: 2,
+            //     audio: car3Audio // Necesitas crear car3Audio arriba
+            // }
+        ];
+
+        // Crear elementos de audio HTML para cada auto (SIN Web Audio API - sin CORS issues)
+        carsConfig.forEach(config => {
+            const audioElement = document.createElement('audio');
+            audioElement.loop = true;
+            audioElement.volume = config.audio.maxVolume;
+            audioElement.preload = 'auto';
+            config.audio.audioElement = audioElement;
+            console.log(`🔊 Elemento de audio creado para ${config.name}`);
+        });
+
+        // Array para almacenar referencias a autos cargados
+        const loadedCars = {};
+        const carMusicState = {};
+
+        // Auto activo en el menú de música
+        let currentAudioTarget = null; // ID del auto ('car1', 'car2', etc)
+
+        // YouTube Player (mantener compatibilidad)
+        let youtubePlayer = null;
+        let youtubePlayerReady = false;
+        let currentMusicType = null; // 'audio' o 'youtube'
+
+        // Rol en el auto
+        let carRole = null; // 'driver', 'passenger', o null
+        let currentCarId = null; // ID del auto en el que estás
+
+        // 1. ESCENA Y RENDERER
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x87ceeb);
+        scene.fog = new THREE.Fog(0x87ceeb, 150, 400);
+
+        const renderer = new THREE.WebGLRenderer({ 
+            antialias: true,
+            powerPreference: "high-performance", // Optimizar para rendimiento
+            stencil: false, // Desactivar stencil si no se usa
+            depth: true
+        });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap; // Mejor calidad de sombras
+        renderer.shadowMap.autoUpdate = true;
+        renderer.frustumCulled = true; // Habilitar frustum culling automático
+        renderer.sortObjects = false; // Optimización: desactivar sorting innecesario
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5)); // Limitar pixel ratio para mejor rendimiento
+        document.body.appendChild(renderer.domElement);
+
+// 2. CÁMARA
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+camera.position.set(0, 2, 5);
+
+// 3. CONTROLES DE POINTER LOCK
+const controls = new PointerLockControls(camera, document.body);
+scene.add(controls.getObject());
+
+let isPlayerMode = true;
+let isMusicMenuOpen = false;
+const playerSpeed = 0.15;
+
+const playerRadius = 0.6; // Aumentado el radio de entrada al vehículo
+const moveForward = { active: false };
+const moveBackward = { active: false };
+const moveLeft = { active: false };
+const moveRight = { active: false };
+
+document.addEventListener('click', () => {
+    if (isPlayerMode && !controls.isLocked && !isMusicMenuOpen) {
+        controls.lock();
+    }
+});
+
+controls.addEventListener('lock', () => {
+    document.getElementById('crosshair').style.display = 'block';
+});
+        controls.addEventListener('unlock', () => {
+            document.getElementById('crosshair').style.display = 'none';
+        });
+
+        // 4. LUCES
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+        scene.add(ambientLight);
+
+        const sun = new THREE.DirectionalLight(0xffffff, 1);
+        sun.position.set(50, 50, 50);
+        sun.castShadow = true;
+        sun.shadow.mapSize.width = 2048;
+        sun.shadow.mapSize.height = 2048;
+        sun.shadow.camera.near = 0.5;
+        sun.shadow.camera.far = 200; // Reducir distancia de sombras
+        sun.shadow.bias = -0.0001;
+        sun.shadow.radius = 4; // Suavizar bordes de sombras
+        scene.add(sun);
+
+        // Luces adicionales para calidad alta (inicialmente no agregadas)
+        let fillLights = [];
+
+        // Variable para calidad gráfica actual
+        let currentGraphicsQuality = 'normal'; // 'low', 'normal', 'high'
+
+        // Función para aplicar calidad gráfica
+        function applyGraphicsQuality(quality) {
+            currentGraphicsQuality = quality;
+            
+            // Remover luces de relleno si existen
+            fillLights.forEach(light => {
+                scene.remove(light);
+            });
+            fillLights = [];
+
+            if (quality === 'low') {
+                // BAJO: Reducir distancias de renderizado
+                LOD_DISTANCE_NEAR = 20;
+                LOD_DISTANCE_MID = 40;
+                LOD_DISTANCE_FAR = 70;
+                VISIBILITY_DISTANCE = 100;
+                
+                // Reducir calidad de sombras
+                sun.shadow.mapSize.width = 1024;
+                sun.shadow.mapSize.height = 1024;
+                sun.shadow.camera.far = 150;
+                ambientLight.intensity = 0.9;
+                
+                // Sol en posición normal
+                sun.position.set(50, 50, 50);
+                sun.intensity = 0.8;
+                
+            } else if (quality === 'normal') {
+                // NORMAL: Configuración estándar
+                LOD_DISTANCE_NEAR = 30;
+                LOD_DISTANCE_MID = 60;
+                LOD_DISTANCE_FAR = 100;
+                VISIBILITY_DISTANCE = 150;
+                
+                // Calidad de sombras estándar
+                sun.shadow.mapSize.width = 2048;
+                sun.shadow.mapSize.height = 2048;
+                sun.shadow.camera.far = 200;
+                ambientLight.intensity = 0.8;
+                
+                // Sol en posición normal
+                sun.position.set(50, 50, 50);
+                sun.intensity = 1;
+                
+            } else if (quality === 'high') {
+                // ALTO: Iluminación mejorada con sol centrado
+                LOD_DISTANCE_NEAR = 30;
+                LOD_DISTANCE_MID = 60;
+                LOD_DISTANCE_FAR = 100;
+                VISIBILITY_DISTANCE = 150;
+                
+                // Máxima calidad de sombras - ASEGURAR QUE ESTÉN ACTIVAS
+                sun.castShadow = true;
+                sun.shadow.mapSize.width = 2048;
+                sun.shadow.mapSize.height = 2048;
+                sun.shadow.camera.far = 200;
+                sun.shadow.camera.left = -100;
+                sun.shadow.camera.right = 100;
+                sun.shadow.camera.top = 100;
+                sun.shadow.camera.bottom = -100;
+                ambientLight.intensity = 1.2;
+                
+                // Sol centrado arriba
+                sun.position.set(0, 100, 0);
+                sun.intensity = 0.8;
+                
+                // Agregar luces de relleno
+                const fillLight1 = new THREE.DirectionalLight(0xffffff, 0.3);
+                fillLight1.position.set(0, 50, 50);
+                scene.add(fillLight1);
+                fillLights.push(fillLight1);
+
+                const fillLight2 = new THREE.DirectionalLight(0xffffff, 0.2);
+                fillLight2.position.set(0, 30, -50);
+                scene.add(fillLight2);
+                fillLights.push(fillLight2);
+
+                const fillLight3 = new THREE.DirectionalLight(0xffffff, 0.15);
+                fillLight3.position.set(50, 40, 0);
+                scene.add(fillLight3);
+                fillLights.push(fillLight3);
+
+                const fillLight4 = new THREE.DirectionalLight(0xffffff, 0.15);
+                fillLight4.position.set(-50, 40, 0);
+                scene.add(fillLight4);
+                fillLights.push(fillLight4);
+            }
+
+            // Actualizar sombras
+            sun.shadow.camera.updateProjectionMatrix();
+            
+            // Actualizar UI del menú
+            document.querySelectorAll('.quality-option').forEach(option => {
+                option.classList.remove('selected');
+                if (option.dataset.quality === quality) {
+                    option.classList.add('selected');
+                }
+            });
+        }
+
+        // Event listeners para el menú de configuración gráfica
+        document.querySelectorAll('.quality-option').forEach(option => {
+            option.addEventListener('click', () => {
+                const quality = option.dataset.quality;
+                applyGraphicsQuality(quality);
+            });
+        });
+
+        document.getElementById('closeGraphicsBtn').addEventListener('click', () => {
+            document.getElementById('graphicsMenu').style.display = 'none';
+            isMusicMenuOpen = false;
+        });
+
+        // 5. PISO
+        const floorGeo = new THREE.PlaneGeometry(1000, 1000);
+        const floorMat = new THREE.MeshStandardMaterial({
+            color: 0x5cb85c,
+            roughness: 0.8,
+        });
+        const floor = new THREE.Mesh(floorGeo, floorMat);
+        floor.rotation.x = -Math.PI / 2;
+        floor.receiveShadow = true;
+        scene.add(floor);
+
+        // CARRETERA
+        const roadGeo = new THREE.PlaneGeometry(20, 1000);
+        const roadMat = new THREE.MeshStandardMaterial({
+            color: 0x3d3d3d,
+            roughness: 0.9,
+        });
+        const road = new THREE.Mesh(roadGeo, roadMat);
+        road.rotation.x = -Math.PI / 2;
+        road.position.y = 0.01;
+        road.receiveShadow = true;
+        scene.add(road);
+
+        // Líneas amarillas
+        const lineGeo = new THREE.PlaneGeometry(0.5, 10);
+        const lineMat = new THREE.MeshBasicMaterial({ color: 0xffdd00 });
+
+        for (let i = -50; i < 50; i++) {
+            const line = new THREE.Mesh(lineGeo, lineMat);
+            line.rotation.x = -Math.PI / 2;
+            line.position.set(0, 0.02, i * 20);
+            scene.add(line);
+        }
+
+        // Árboles (con optimización de distancia)
+        const trees = [];
+        function createTree(x, z) {
+            const tree = new THREE.Group();
+
+            const trunkGeo = new THREE.CylinderGeometry(0.3, 0.4, 3, 8);
+            const trunkMat = new THREE.MeshStandardMaterial({
+                color: 0x6b4423,
+                roughness: 0.9
+            });
+            const trunk = new THREE.Mesh(trunkGeo, trunkMat);
+            trunk.position.y = 1.5;
+            trunk.castShadow = true;
+            trunk.frustumCulled = true;
+            tree.add(trunk);
+
+            const foliageGeo = new THREE.SphereGeometry(2, 8, 8);
+            const foliageMat = new THREE.MeshStandardMaterial({
+                color: 0x3a7d3a,
+                roughness: 0.8
+            });
+            const foliage = new THREE.Mesh(foliageGeo, foliageMat);
+            foliage.position.y = 4;
+            foliage.castShadow = true;
+            foliage.frustumCulled = true;
+            tree.add(foliage);
+
+            tree.position.set(x, 0, z);
+            tree.frustumCulled = true;
+            tree.userData.isTree = true;
+            return tree;
+        }
+
+        for (let i = 0; i < 30; i++) {
+            const z = (Math.random() - 0.5) * 500;
+            const tree1 = createTree(-30 - Math.random() * 20, z);
+            const tree2 = createTree(30 + Math.random() * 20, z);
+            scene.add(tree1);
+            scene.add(tree2);
+            trees.push(tree1, tree2);
+        }
+
+        // Nubes (con optimización de distancia)
+        const clouds = [];
+        function createCloud(x, y, z) {
+            const cloud = new THREE.Group();
+            const cloudMat = new THREE.MeshStandardMaterial({
+                color: 0xffffff,
+                transparent: true,
+                opacity: 0.8,
+                roughness: 1
+            });
+
+            for (let i = 0; i < 5; i++) {
+                const sphere = new THREE.Mesh(
+                    new THREE.SphereGeometry(3 + Math.random() * 2, 8, 8),
+                    cloudMat
+                );
+                sphere.position.set(
+                    (Math.random() - 0.5) * 8,
+                    (Math.random() - 0.5) * 2,
+                    (Math.random() - 0.5) * 8
+                );
+                sphere.frustumCulled = true;
+                cloud.add(sphere);
+            }
+
+            cloud.position.set(x, y, z);
+            cloud.frustumCulled = true;
+            cloud.userData.isCloud = true;
+            return cloud;
+        }
+
+        for (let i = 0; i < 15; i++) {
+            const cloud = createCloud(
+                (Math.random() - 0.5) * 300,
+                30 + Math.random() * 20,
+                (Math.random() - 0.5) * 300
+            );
+            scene.add(cloud);
+            clouds.push(cloud);
+        }
+
+        // Flores (con optimización de distancia)
+        const flowers = [];
+        function createFlower(x, z) {
+            const colors = [0xff5252, 0xffeb3b, 0x00bcd4, 0xe91e63];
+            const flowerGeo = new THREE.SphereGeometry(0.2, 6, 6);
+            const flowerMat = new THREE.MeshStandardMaterial({
+                color: colors[Math.floor(Math.random() * colors.length)],
+                roughness: 0.6
+            });
+            const flower = new THREE.Mesh(flowerGeo, flowerMat);
+            flower.position.set(x, 0.2, z);
+            flower.frustumCulled = true;
+            flower.userData.isFlower = true;
+            return flower;
+        }
+
+        for (let i = 0; i < 50; i++) {
+            const x = (Math.random() - 0.5) * 200;
+            const z = (Math.random() - 0.5) * 500;
+            if (Math.abs(x) > 15) {
+                const flower = createFlower(x, z);
+                scene.add(flower);
+                flowers.push(flower);
+            }
+        }
+
+        // ========================================
+        // 🚗 CARGA DINÁMICA DE AUTOS
+        // ========================================
+        // Este sistema carga automáticamente todos los autos del array carsConfig
+
+        // Variables compatibles con código legacy
+        let car = null;
+        let carContainer = null;
+        let carCollisionBox = null;
+        let carBaseY = 1.5;
+
+        let car2 = null;
+        let car2Container = null;
+        let car2CollisionBox = null;
+        let car2BaseY = 1.5;
+        let car2Bounce = 0;
+
+        // Variable para controlar qué auto está activo (el que estás manejando)
+        let activeCarContainer = null;
+        let activeCarCollisionBox = null;
+        let activeCarBaseY = 1.5;
+
+        // Función para cargar un auto desde configuración
+        function loadCarFromConfig(config) {
+            return new Promise((resolve, reject) => {
+                console.log(`🚗 Cargando ${config.name} (${config.id})...`);
+
+                const container = new THREE.Group();
+                scene.add(container);
+
+                const loader = new GLTFLoader();
+
+                loader.load(
+                    config.modelUrl,
+                    (gltf) => {
+                        const model = gltf.scene;
+
+                        // Centrar modelo
+                        const box = new THREE.Box3().setFromObject(model);
+                        const size = box.getSize(new THREE.Vector3()).length();
+                        const center = box.getCenter(new THREE.Vector3());
+
+                        model.position.x = -center.x;
+                        model.position.z = -center.z;
+                        model.position.y = -box.min.y;
+
+                        // Aplicar rotación de configuración
+                        model.rotation.x = config.rotation.x;
+                        model.rotation.y = config.rotation.y;
+                        model.rotation.z = config.rotation.z;
+
+                        // Escalar modelo
+                        const scaleFactor = (8 / size) * config.scale;
+                        model.scale.set(scaleFactor, scaleFactor, scaleFactor);
+
+                        // Habilitar sombras y configurar LOD
+                        const meshes = [];
+                        model.traverse(n => {
+                            if (n.isMesh) {
+                                n.castShadow = true;
+                                n.receiveShadow = true;
+                                n.frustumCulled = true; // Habilitar frustum culling por mesh
+                                meshes.push(n);
+                            }
+                        });
+
+                        container.add(model);
+                        container.position.set(config.position.x, config.position.y || 1.5, config.position.z);
+                        
+                        // Guardar referencia a meshes para LOD
+                        container.userData.meshes = meshes;
+                        container.userData.originalMaterials = meshes.map(m => m.material);
+                        container.userData.lastLODUpdate = 0;
+
+                        // Calcular collision box
+                        const carBox = new THREE.Box3().setFromObject(container);
+                        const carSize = carBox.getSize(new THREE.Vector3());
+                        const collisionBox = {
+                            width: carSize.x * 0.8,
+                            length: carSize.z * 0.8,
+                            height: carSize.y
+                        };
+
+                        // Guardar en loadedCars
+                        loadedCars[config.id] = {
+                            id: config.id,
+                            name: config.name,
+                            model: model,
+                            container: container,
+                            collisionBox: collisionBox,
+                            baseY: config.position.y || 1.5,
+                            bounce: 0,
+                            audio: config.audio,
+                            frustumCulled: true // Habilitar frustum culling
+                        };
+
+                        // Compatibilidad con código legacy
+                        if (config.id === 'car1') {
+                            car = model;
+                            carContainer = container;
+                            carCollisionBox = collisionBox;
+                            carBaseY = config.position.y || 1.5;
+                        } else if (config.id === 'car2') {
+                            car2 = model;
+                            car2Container = container;
+                            car2CollisionBox = collisionBox;
+                            car2BaseY = config.position.y || 1.5;
+                        }
+
+                        console.log(`✅ ${config.name} cargado!`);
+                        resolve(loadedCars[config.id]);
+                    },
+                    (xhr) => {
+                        const progress = (xhr.loaded / xhr.total * 100).toFixed(2);
+                        console.log(`${config.name} cargando: ${progress}%`);
+                    },
+                    (error) => {
+                        console.error(`❌ Error cargando ${config.name}:`, error);
+                        reject(error);
+                    }
+                );
+            });
+        }
+
+        // Cargar todos los autos del array de configuración
+        async function loadAllCars() {
+            try {
+                console.log(`🚗 Cargando ${carsConfig.length} autos...`);
+
+                const loadPromises = carsConfig.map(config => loadCarFromConfig(config));
+                await Promise.all(loadPromises);
+
+                console.log('✅ Todos los autos cargados!');
+                document.getElementById('status').innerText = "¡Modelos cargados! Presiona F para la música";
+            } catch (error) {
+                console.error('❌ Error cargando autos:', error);
+                document.getElementById('status').innerText = "Error al cargar algunos autos";
+            }
+        }
+
+        // Iniciar carga de autos
+        loadAllCars();
+
+        // ===== SISTEMA MULTIPLAYER =====
+
+        // Login del jugador
+        function joinGame() {
+            const nameInput = document.getElementById('playerName');
+            const playerName = nameInput.value.trim();
+
+            if (!playerName) {
+                alert('Por favor ingresa tu nombre');
+                return;
+            }
+
+            currentPlayerId = 'player_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            currentPlayerName = playerName;
+            isOnline = true;
+
+            // Crear referencia del jugador en Firebase bajo carGame
+            const playerRef = ref(database, `carGame/players/${currentPlayerId}`);
+
+            // Configurar datos iniciales del jugador
+            set(playerRef, {
+                name: currentPlayerName,
+                x: 0,
+                y: 1.7,
+                z: 5,
+                rotation: 0,
+                mode: 'player', // 'player' or 'car'
+                timestamp: Date.now()
+            });
+
+            // Configurar desconexión automática
+            onDisconnect(playerRef).remove();
+
+            // También liberar el auto si lo tenía ocupado al desconectarse
+            const carOccupiedRef = ref(database, 'carGame/carOccupied');
+            get(carOccupiedRef).then(snapshot => {
+                if (snapshot.exists() && snapshot.val() === currentPlayerId) {
+                    onDisconnect(carOccupiedRef).remove();
+                }
+            });
+
+            // Ocultar menu de login y mostrar panel de jugadores
+            document.getElementById('loginMenu').style.display = 'none';
+            document.getElementById('playersPanel').style.display = 'block';
+
+            // Escuchar cambios en otros jugadores
+            setupPlayerListeners();
+
+            console.log('Conectado como:', currentPlayerName);
+        }
+
+        // Configurar listeners para otros jugadores
+        let playerListenersSetup = false;
+        function setupPlayerListeners() {
+            if (playerListenersSetup) return;
+            playerListenersSetup = true;
+
+            const playersRef = ref(database, 'carGame/players');
+
+            onValue(playersRef, (snapshot) => {
+                const players = snapshot.val();
+
+                if (!players) {
+                    updatePlayersList({});
+                    return;
+                }
+
+                // Actualizar lista de jugadores
+                updatePlayersList(players);
+
+                // Actualizar modelos 3D de otros jugadores
+                Object.keys(players).forEach(playerId => {
+                    if (playerId !== currentPlayerId) {
+                        const playerData = players[playerId];
+                        updateOtherPlayer(playerId, playerData);
+                    }
+                });
+
+                // Eliminar jugadores que ya no están
+                Object.keys(otherPlayers).forEach(playerId => {
+                    if (!players[playerId]) {
+                        removeOtherPlayer(playerId);
+                    }
+                });
+            });
+
+            // Sistema de tracking para evitar recargas innecesarias
+            const loadedMusicURLs = {};
+            const loadingInProgress = {}; // Prevenir cargas simultáneas
+            const lastLoadTime = {}; // Evitar recargas rápidas
+
+            // Crear listeners dinámicos para TODOS los autos
+            carsConfig.forEach(config => {
+                const carMusicRef = ref(database, `carGame/${config.id}Music`);
+                onValue(carMusicRef, async (snapshot) => {
+                    const musicData = snapshot.val();
+
+                    if (!musicData) {
+                        // Limpiar tracking si no hay música
+                        delete loadedMusicURLs[config.id];
+                        delete loadingInProgress[config.id];
+                        delete lastLoadTime[config.id];
+                        delete carMusicState[config.id];
+
+                        // Detener audio HTML local para este auto
+                        const audioObj = loadedCars[config.id] ? loadedCars[config.id].audio :
+                            (config.id === 'car2' ? car2Audio : car1Audio);
+                        if (audioObj && audioObj.audioElement) {
+                            audioObj.audioElement.pause();
+                            audioObj.audioElement.currentTime = 0;
+                            audioObj.isPlaying = false;
+                        }
+
+                        // Actualizar UI si estamos viendo este auto
+                        if (currentAudioTarget === config.id) {
+                            musicStatusText.textContent = '⏸️ Música detenida';
+                            musicInfo.textContent = '';
+                            bassLevelSpan.textContent = '0';
+                        }
+
+                        return;
+                    }
+
+                    // Guardar estado de música por auto (para rellenar menú luego)
+                    carMusicState[config.id] = musicData;
+
+                    // Si YO puso esta música, no recargarla (pero sí mantenemos estado)
+                    if (musicData.playerId === currentPlayerId) return;
+
+                    // Si ya está cargando, esperar
+                    if (loadingInProgress[config.id]) {
+                        return;
+                    }
+
+                    // Si ya está cargada esta misma URL, no recargarla
+                    if (loadedMusicURLs[config.id] === musicData.url) {
+                        // Verificar que esté reproduciendo
+                        if (config.audio.audioElement && !config.audio.audioElement.paused) {
+                            return; // Ya está reproduciendo
+                        }
+                    }
+
+                    // Evitar recargas muy rápidas (debounce de 2 segundos)
+                    const now = Date.now();
+                    if (lastLoadTime[config.id] && (now - lastLoadTime[config.id]) < 2000) {
+                        console.log(`⏱️ Esperando debounce para ${config.name}...`);
+                        return;
+                    }
+
+                    // Marcar como cargando
+                    loadingInProgress[config.id] = true;
+                    lastLoadTime[config.id] = now;
+
+                    // Otro jugador puso música NUEVA en este auto, reproducirla
+                    try {
+                        console.log(`🎵 Sincronizando música ${config.name}`);
+                        config.audio.maxVolume = musicData.volume || 1.0;
+                        config.audio.bassSensitivity = musicData.bassSensitivity || 0.5;
+                        await loadAudioFromURL(musicData.url, config.id);
+                        playAudio(config.id);
+
+                        // Guardar URL cargada
+                        loadedMusicURLs[config.id] = musicData.url;
+                    } catch (error) {
+                        console.error(`❌ Error cargando música ${config.name}:`, error);
+                    } finally {
+                        // Liberar flag de carga
+                        loadingInProgress[config.id] = false;
+                    }
+                });
+
+                // Crear listener para ocupantes de este auto
+                const occupantsRef = ref(database, `carGame/${config.id}Occupants`);
+                onValue(occupantsRef, (snapshot) => {
+                    const occupants = snapshot.val();
+                    // Solo log en cambios
+                    if (occupants && Object.keys(occupants).length > 0) {
+                        // Silencioso - no spamear consola
+                    }
+                });
+            });
+        }
+
+        // Actualizar panel de jugadores
+        function updatePlayersList(players) {
+            const playersList = document.getElementById('playersList');
+            playersList.innerHTML = '';
+
+            let count = 0;
+            Object.keys(players).forEach(playerId => {
+                const player = players[playerId];
+                const div = document.createElement('div');
+                div.className = 'player-item' + (playerId === currentPlayerId ? ' self' : '');
+
+                div.innerHTML = `
+                    <div class="player-name">${player.name}</div>
+                    <div class="player-status">Modo: ${player.mode === 'player' ? '🚶 Jugador' : '🚗 Auto'}</div>
+                `;
+
+                playersList.appendChild(div);
+                count++;
+            });
+
+            // Actualizar título con conteo
+            document.querySelector('#playersPanel h3').textContent = `👥 Jugadores Online (${count})`;
+        }
+
+        // Crear el modelo 3D para otro jugador
+        function createOtherPlayerModel(playerData) {
+            const group = new THREE.Group();
+
+            // Crear modelo simple de jugador (cilindro + esfera)
+            const bodyGeo = new THREE.CylinderGeometry(0.3, 0.3, 1.5, 8);
+            const bodyMat = new THREE.MeshStandardMaterial({ color: 0x00aaff });
+            const body = new THREE.Mesh(bodyGeo, bodyMat);
+            body.position.y = 0.75;
+            body.castShadow = true;
+            body.name = 'playerBody'; // Identificador para controlar visibilidad
+            group.add(body);
+
+            const headGeo = new THREE.SphereGeometry(0.3, 8, 8);
+            const headMat = new THREE.MeshStandardMaterial({ color: 0xffcc99 });
+            const head = new THREE.Mesh(headGeo, headMat);
+            head.position.y = 1.8;
+            head.castShadow = true;
+            head.name = 'playerHead'; // Identificador para controlar visibilidad
+            group.add(head);
+
+            // Etiqueta con nombre
+            const canvas = document.createElement('canvas');
+            canvas.width = 256;
+            canvas.height = 64;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+            ctx.fillRect(0, 0, 256, 64);
+            ctx.fillStyle = '#00ff88';
+            ctx.font = 'bold 32px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(playerData.name, 128, 42);
+
+            const texture = new THREE.CanvasTexture(canvas);
+            const spriteMat = new THREE.SpriteMaterial({ map: texture });
+            const sprite = new THREE.Sprite(spriteMat);
+            sprite.scale.set(2, 0.5, 1);
+            sprite.position.y = 2.5;
+            sprite.name = 'playerNameTag'; // Identificador para la etiqueta
+            group.add(sprite);
+
+            return group;
+        }
+
+        // Actualizar la posición de otro jugador
+        function updateOtherPlayer(playerId, playerData) {
+            if (!otherPlayers[playerId]) {
+                // Crear nuevo modelo si no existe
+                const model = createOtherPlayerModel(playerData);
+                model.position.set(playerData.x, playerData.y, playerData.z);
+
+                // Configurar visibilidad inicial
+                const body = model.getObjectByName('playerBody');
+                const head = model.getObjectByName('playerHead');
+                if (body) body.visible = (playerData.mode === 'player');
+                if (head) head.visible = (playerData.mode === 'player');
+
+                scene.add(model);
+                otherPlayers[playerId] = {
+                    model,
+                    data: playerData,
+                    targetPos: new THREE.Vector3(playerData.x, playerData.y, playerData.z),
+                    targetRotation: playerData.rotation || 0,
+                    velocity: new THREE.Vector3(0, 0, 0)
+                };
+            } else {
+                // Actualizar posición existente con interpolación suave mejorada
+                const player = otherPlayers[playerId];
+
+                // Mostrar/ocultar cuerpo según el modo (el nombre siempre visible)
+                const body = player.model.getObjectByName('playerBody');
+                const head = player.model.getObjectByName('playerHead');
+                const nameTag = player.model.getObjectByName('playerNameTag');
+
+                if (body) body.visible = (playerData.mode === 'player');
+                if (head) head.visible = (playerData.mode === 'player');
+                // nameTag siempre visible
+
+                // Si está en el auto, ajustar posición del nombre más arriba
+                if (nameTag) {
+                    nameTag.position.y = (playerData.mode === 'car') ? 4 : 2.5;
+                }
+
+                // Calcular velocidad para predicción
+                const oldTarget = player.targetPos.clone();
+                player.targetPos.set(playerData.x, playerData.y, playerData.z);
+                player.targetRotation = playerData.rotation || 0;
+                const oldTimestamp = (player.data && typeof player.data.timestamp === 'number') ? player.data.timestamp : (playerData.timestamp || Date.now());
+                const newTimestamp = (typeof playerData.timestamp === 'number') ? playerData.timestamp : Date.now();
+                const dt = Math.max(0.001, (newTimestamp - oldTimestamp) / 1000);
+                player.velocity.subVectors(player.targetPos, oldTarget).multiplyScalar(1 / dt);
+
+                player.data = playerData;
+            }
+        }
+
+        // Eliminar jugador que se desconectó
+        function removeOtherPlayer(playerId) {
+            if (otherPlayers[playerId]) {
+                scene.remove(otherPlayers[playerId].model);
+                delete otherPlayers[playerId];
+            }
+        }
+
+        // Actualizar posición del jugador actual en Firebase
+        function updateMyPosition() {
+            if (!isOnline || !currentPlayerId) return;
+
+            const now = Date.now();
+            if (now - lastUpdateTime < UPDATE_INTERVAL) return;
+
+            const playerRef = ref(database, `carGame/players/${currentPlayerId}`);
+
+            let posX, posY, posZ, rotation, mode;
+
+            if (isPlayerMode) {
+                const pos = controls.getObject().position;
+                posX = pos.x;
+                posY = pos.y;
+                posZ = pos.z;
+                rotation = 0;
+                mode = 'player';
+            } else {
+                // Usar el auto activo (el que realmente estás manejando)
+                const activeCar = activeCarContainer || carContainer;
+                posX = activeCar.position.x;
+                posY = activeCar.position.y;
+                posZ = activeCar.position.z;
+                rotation = activeCar.rotation.y;
+                mode = 'car';
+            }
+
+            // Solo enviar si hay cambios significativos
+            const posChanged = Math.abs(posX - lastSentPosition.x) > MIN_POSITION_CHANGE ||
+                Math.abs(posY - lastSentPosition.y) > MIN_POSITION_CHANGE ||
+                Math.abs(posZ - lastSentPosition.z) > MIN_POSITION_CHANGE;
+            const rotChanged = Math.abs(rotation - lastSentPosition.rotation) > MIN_ROTATION_CHANGE;
+            const modeChanged = mode !== lastSentPosition.mode;
+
+            // Solo actualizar si hay cambios significativos
+            if (posChanged || rotChanged || modeChanged) {
+                lastUpdateTime = now;
+                lastSentPosition = { x: posX, y: posY, z: posZ, rotation, mode };
+
+                dbUpdate(playerRef, {
+                    x: Number(posX.toFixed(2)),
+                    y: Number(posY.toFixed(2)),
+                    z: Number(posZ.toFixed(2)),
+                    rotation: Number(rotation.toFixed(2)),
+                    mode: mode,
+                    carId: currentCarId || 'car1', // ENVIAR QUÉ AUTO ESTAMOS USANDO
+                    timestamp: now
+                });
+            }
+        }
+
+        // Verificar si el auto está disponible (conductor o pasajero)
+        async function checkCarAvailability(carId = 'car1') {
+            if (!isOnline) return { canJoin: true, role: 'driver' }; // Si no está online, siempre disponible
+
+            try {
+                // Usar referencia separada por auto
+                const carRef = ref(database, `carGame/${carId}Occupants`);
+                const snapshot = await get(carRef);
+
+                if (!snapshot.exists()) {
+                    return { canJoin: true, role: 'driver' }; // Auto libre, ser conductor
+                }
+
+                const occupants = snapshot.val();
+                const occupantsList = Object.values(occupants);
+
+                // Si ya estoy en el auto, permitir
+                if (occupants[currentPlayerId]) {
+                    return { canJoin: true, role: occupants[currentPlayerId].role };
+                }
+
+                // Límite: 1 conductor + 3 pasajeros = 4 personas máximo
+                if (occupantsList.length >= 4) {
+                    return { canJoin: false, role: null }; // Auto lleno
+                }
+
+                // Verificar si ya hay conductor
+                const hasDriver = occupantsList.some(o => o.role === 'driver');
+
+                if (!hasDriver) {
+                    return { canJoin: true, role: 'driver' }; // Ser conductor
+                } else {
+                    return { canJoin: true, role: 'passenger' }; // Ser pasajero
+                }
+            } catch (error) {
+                console.error('Error verificando disponibilidad del auto:', error);
+                return { canJoin: true, role: 'driver' }; // En caso de error, permitir
+            }
+        }
+
+        // Event listener para el botón de login
+        document.getElementById('joinBtn').addEventListener('click', joinGame);
+
+        // Permitir Enter para unirse
+        document.getElementById('playerName').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                joinGame();
+            }
+        });
+
+        // Inicializar Web Audio API - DINÁMICO para TODOS los autos
+        function initAudioContext() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+                // Inicializar para TODOS los autos en carsConfig
+                carsConfig.forEach(config => {
+                    const audioObj = config.audio;
+                    if (audioObj) {
+                        audioObj.analyser = audioContext.createAnalyser();
+                        audioObj.analyser.fftSize = 256;
+                        const bufferLength = audioObj.analyser.frequencyBinCount;
+                        audioObj.dataArray = new Uint8Array(bufferLength);
+                        audioObj.gainNode = audioContext.createGain();
+                        audioObj.gainNode.connect(audioContext.destination);
+                    }
+                });
+
+                console.log(`🎵 Audio inicializado para ${carsConfig.length} autos`);
+            }
+        }
+
+        // Cargar audio desde URL - SIMPLIFICADO con elementos HTML (¡SIN CORS!)
+        async function loadAudioFromURL(url, carId = 'car1') {
+            try {
+                musicStatusText.textContent = '⏳ Cargando música...';
+                console.log(`🎵 Configurando audio para ${carId}...`);
+
+                // Buscar el objeto de audio correcto
+                const audioObj = loadedCars[carId] ? loadedCars[carId].audio :
+                    (carId === 'car2' ? car2Audio : car1Audio);
+
+                if (!audioObj || !audioObj.audioElement) {
+                    console.error(`No hay elemento de audio para ${carId}`);
+                    throw new Error('No hay elemento de audio');
+                }
+
+                // Simplemente asignar la URL al elemento de audio HTML
+                audioObj.audioElement.src = url;
+                audioObj.audioElement.volume = audioObj.maxVolume;
+
+                musicStatusText.textContent = '✅ Música lista';
+                console.log(`✅ Audio configurado para ${carId}`);
+                return true;
+            } catch (error) {
+                console.error(`❌ Error configurando audio para ${carId}:`, error.message);
+                musicStatusText.textContent = `❌ Error: ${error.message}`;
+                throw error;
+            }
+        }
+
+        // ===== FUNCIONES DE YOUTUBE =====
+
+        // Detectar si es un link de YouTube
+        function isYouTubeURL(url) {
+            const youtubeRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?\&]v=)|youtu\.be\/)([^"\&?\/\s]{11})/;
+            return youtubeRegex.test(url);
+        }
+
+        // Extraer video ID de YouTube
+        function getYouTubeVideoID(url) {
+            const youtubeRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?\&]v=)|youtu\.be\/)([^"\&?\/\s]{11})/;
+            const match = url.match(youtubeRegex);
+            return match ? match[1] : null;
+        }
+
+        // Reproducir YouTube (simplificado)
+        function playYouTube(videoID) {
+            console.log('YouTube playback simplificado:', videoID);
+        }
+
+        // Detener YouTube
+        function stopYouTube() {
+            console.log('YouTube detenido');
+        }
+
+        // Reproducir audio - SIMPLIFICADO para elementos HTML
+        function playAudio(carId = 'car1') {
+            // Buscar el objeto de audio en loadedCars o usar legacy
+            let audioObj;
+            if (loadedCars[carId]) {
+                audioObj = loadedCars[carId].audio;
+            } else if (carId === 'car2') {
+                audioObj = car2Audio;
+            } else {
+                audioObj = car1Audio;
+            }
+
+            if (!audioObj || !audioObj.audioElement) {
+                console.warn(`No hay audio element para ${carId}`);
+                return;
+            }
+
+            // Si ya está sonando, no reiniciar
+            if (!audioObj.audioElement.paused) {
+                console.log(`✓ Audio ${carId} ya está reproduciendo`);
+                return;
+            }
+
+            // Reproducir el audio HTML
+            audioObj.audioElement.play().then(() => {
+                audioObj.isPlaying = true;
+                console.log(`🎵 Reproduciendo audio para ${carId}`);
+            }).catch(err => {
+                console.error(`Error reproduciendo ${carId}:`, err);
+            });
+        }
+
+        // Obtener nivel de bajos EMULADO - sin analizar el audio real
+        function getBassLevel(carId = 'car1') {
+            // Resolver objeto de audio del auto
+            let audioObj;
+            if (loadedCars[carId] && loadedCars[carId].audio) {
+                audioObj = loadedCars[carId].audio;
+            } else if (carId === 'car2') {
+                audioObj = car2Audio;
+            } else if (carId === 'car3') {
+                audioObj = car3Audio;
+            } else {
+                audioObj = car1Audio;
+            }
+
+            if (!audioObj || !audioObj.isPlaying) return 0;
+
+            // Generar una onda senoidal suave basada en el tiempo para simular el "bass"
+            const now = performance.now() / 200; // velocidad del pulso
+
+            // Fase aleatoria por auto para que no se muevan todos igual
+            if (audioObj._bassPhase === undefined) {
+                audioObj._bassPhase = Math.random() * Math.PI * 2;
+            }
+
+            const baseWave = (Math.sin(now + audioObj._bassPhase) + 1) / 2; // 0..1
+            const jitter = (Math.random() - 0.5) * 0.2; // pequeña variación aleatoria
+
+            let level = baseWave + jitter;
+            if (level < 0) level = 0;
+            if (level > 1) level = 1;
+            return level;
+        }
+
+        // Sistema de música
+        const musicMenu = document.getElementById('musicMenu');
+        const musicUrl = document.getElementById('musicUrl');
+        const playBtn = document.getElementById('playBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const closeBtn = document.getElementById('closeBtn');
+        const volumeSlider = document.getElementById('volumeSlider');
+        const volumeValue = document.getElementById('volumeValue');
+        const bassSensitivitySlider = document.getElementById('bassSensitivity');
+        const bassValue = document.getElementById('bassValue');
+        const musicStatusText = document.getElementById('musicStatusText');
+        const musicInfo = document.getElementById('musicInfo');
+        const bassLevelSpan = document.getElementById('bassLevel');
+
+        volumeSlider.addEventListener('input', (e) => {
+            const newVolume = e.target.value / 100;
+            volumeValue.textContent = e.target.value;
+
+            if (currentAudioTarget && loadedCars[currentAudioTarget]) {
+                const audioObj = loadedCars[currentAudioTarget].audio;
+                audioObj.maxVolume = newVolume;
+                if (audioObj.audioElement) {
+                    audioObj.audioElement.volume = newVolume;
+                }
+            }
+        });
+
+        bassSensitivitySlider.addEventListener('input', (e) => {
+            const newSensitivity = e.target.value / 100;
+            bassValue.textContent = e.target.value;
+
+            if (currentAudioTarget && loadedCars[currentAudioTarget]) {
+                const audioObj = loadedCars[currentAudioTarget].audio;
+                audioObj.bassSensitivity = newSensitivity;
+            }
+        });
+
+        playBtn.addEventListener('click', async () => {
+            const url = musicUrl.value.trim();
+            if (!url) {
+                alert('Por favor ingresa un link de música');
+                return;
+            }
+
+            if (!currentAudioTarget) {
+                alert('Por favor acércate a un auto y presiona F primero');
+                return;
+            }
+
+            try {
+                initAudioContext();
+
+                playBtn.disabled = true;
+                playBtn.textContent = '⏳ Cargando...';
+
+                const audioObj = loadedCars[currentAudioTarget].audio;
+
+                //Detener cualquier reproducción anterior EN ESTE AUTO
+                if (audioObj.audioSource) {
+                    audioObj.audioSource.stop();
+                    audioObj.audioSource.disconnect();
+                    audioObj.audioSource = null;
+                }
+
+                await loadAudioFromURL(url, currentAudioTarget);
+                playAudio(currentAudioTarget);
+
+                musicStatusText.textContent = '🎵 ¡Reproduciendo con Bass Boost!';
+                musicInfo.textContent = '🎵 Música activa - Bass detectado';
+                playBtn.textContent = '▶️ Reproducir';
+                playBtn.disabled = false;
+
+                // Guardar música en Firebase para que todos la escuchen EN ESTE AUTO ESPECÍFICO
+                if (isOnline && currentAudioTarget) {
+                    const musicPath = `carGame/${currentAudioTarget}Music`;
+                    const musicRef = ref(database, musicPath);
+                    set(musicRef, {
+                        url: url,
+                        playerId: currentPlayerId,
+                        playerName: currentPlayerName,
+                        timestamp: Date.now(),
+                        volume: audioObj.maxVolume,
+                        bassSensitivity: audioObj.bassSensitivity
+                    });
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                musicStatusText.textContent = '❌ Error al cargar música';
+                alert('No se pudo cargar la música. Asegúrate de que el link sea un archivo de audio válido (.mp3, .wav, etc.)');
+                playBtn.textContent = '▶️ Reproducir';
+                playBtn.disabled = false;
+            }
+        });
+
+        stopBtn.addEventListener('click', () => {
+            if (!currentAudioTarget) return;
+
+            // Resolver objeto de audio del auto actual (soporta todos los autos)
+            let audioObj;
+            if (loadedCars[currentAudioTarget]) {
+                audioObj = loadedCars[currentAudioTarget].audio;
+            } else if (currentAudioTarget === 'car2') {
+                audioObj = car2Audio;
+            } else {
+                audioObj = car1Audio;
+            }
+
+            if (!audioObj) return;
+
+            // Detener audio Web Audio legacy si existe
+            if (audioObj.audioSource) {
+                audioObj.audioSource.stop();
+                audioObj.audioSource.disconnect();
+                audioObj.audioSource = null;
+            }
+
+            // Detener elemento de audio HTML actual
+            if (audioObj.audioElement) {
+                audioObj.audioElement.pause();
+                audioObj.audioElement.currentTime = 0;
+            }
+
+            audioObj.isPlaying = false;
+            audioObj.bounce = 0;
+            if (youtubePlayer) {
+                stopYouTube();
+            }
+
+            currentMusicType = null;
+            musicStatusText.textContent = '⏸️ Música detenida';
+            musicInfo.textContent = '';
+            bassLevelSpan.textContent = '0';
+
+            // Detener música SOLO para este auto específico en Firebase
+            if (isOnline && currentAudioTarget) {
+                const musicPath = `carGame/${currentAudioTarget}Music`;
+                const musicRef = ref(database, musicPath);
+                remove(musicRef);
+            }
+        });
+
+        closeBtn.addEventListener('click', () => {
+            musicMenu.style.display = 'none';
+            isMusicMenuOpen = false;
+        });
+
+        // Función para ajustar volumen según distancia - TODOS LOS AUTOS DINÁMICAMENTE (OPTIMIZADA)
+        function updateAudioVolume() {
+            // Obtener posición del jugador una sola vez
+            let playerPos;
+            if (isPlayerMode) {
+                playerPos = controls.getObject().position;
+            } else if (activeCarContainer) {
+                playerPos = activeCarContainer.position;
+            } else {
+                return;
+            }
+
+            const maxDistance = 50;
+            const minDistance = 5;
+            const distanceRange = maxDistance - minDistance;
+
+            // Iterar sobre TODOS los autos cargados
+            Object.values(loadedCars).forEach(carData => {
+                if (carData.audio && carData.audio.audioElement && carData.container) {
+                    let volumeFactor = 1;
+
+                    // Si estoy DENTRO de ESTE auto, volumen 100%
+                    if (!isPlayerMode && currentCarId === carData.id) {
+                        volumeFactor = 1;
+                    } else {
+                        // Calcular por distancia (optimizado: evitar crear Vector3 innecesarios)
+                        const dx = playerPos.x - carData.container.position.x;
+                        const dy = playerPos.y - carData.container.position.y;
+                        const dz = playerPos.z - carData.container.position.z;
+                        const distSq = dx * dx + dy * dy + dz * dz;
+                        const dist = Math.sqrt(distSq);
+                        
+                        if (dist <= minDistance) {
+                            volumeFactor = 1;
+                        } else if (dist >= maxDistance) {
+                            volumeFactor = 0;
+                        } else {
+                            volumeFactor = 1 - (dist - minDistance) / distanceRange;
+                        }
+                    }
+
+                    // Solo actualizar si el volumen cambió significativamente (optimización)
+                    const newVolume = carData.audio.maxVolume * volumeFactor;
+                    if (Math.abs(carData.audio.audioElement.volume - newVolume) > 0.01) {
+                        carData.audio.audioElement.volume = newVolume;
+                    }
+                }
+            });
+        }
+
+        // Función para hacer rebotar los autos con el bass - TODOS LOS AUTOS DINÁMICAMENTE
+        function updateCarBounce() {
+            // Iterar sobre TODOS los autos cargados
+            Object.values(loadedCars).forEach(carData => {
+                if (carData.container && carData.audio) {
+                    const bassLevel = getBassLevel(carData.id);
+                    
+                    // Si el bass level es 0, no aplicar rebote y resetear posición
+                    if (bassLevel <= 0) {
+                        if (typeof carData.audio.bounce !== 'number') {
+                            carData.audio.bounce = 0;
+                        } else {
+                            // Suavizar el retorno a la posición base
+                            carData.audio.bounce *= 0.9;
+                            if (Math.abs(carData.audio.bounce) < 0.01) {
+                                carData.audio.bounce = 0;
+                            }
+                        }
+                        carData.container.position.y = carData.baseY + carData.audio.bounce;
+                        carData.container.rotation.z *= 0.9;
+                        return; // Saltar al siguiente auto
+                    }
+
+                    const sensitivity = carData.audio.bassSensitivity || 0.5;
+
+                    // Intensidad crece más fuerte que lineal con la sensibilidad
+                    const intensity = sensitivity;
+                    const intensityPower = Math.pow(intensity, 1.5);
+                    const targetBounce = bassLevel * intensityPower * 1.5;
+
+                    if (typeof carData.audio.bounce !== 'number') {
+                        carData.audio.bounce = 0;
+                    }
+
+                    // A menor sensibilidad, más suave; a mayor sensibilidad, más brusco
+                    const smoothFactor = 0.45 - intensity * 0.3; // ~0.45 en 0, ~0.30 en 0.5, ~0.15 en 1
+                    carData.audio.bounce += (targetBounce - carData.audio.bounce) * smoothFactor;
+
+                    // Aplicar rebote vertical SIEMPRE, para que todos los jugadores lo vean
+                    carData.container.position.y = carData.baseY + carData.audio.bounce;
+
+                    // Pequeña rotación en Z cuando hay mucho bass, visible también desde fuera
+                    if (bassLevel > 0.6 && sensitivity > 0.3) {
+                        if (carData._shakePhase === undefined) {
+                            carData._shakePhase = Math.random() * Math.PI * 2;
+                        }
+                        const shakeIntensity = 0.5 + sensitivity;
+                        const shake = Math.sin(performance.now() * 0.05 + carData._shakePhase) * bassLevel * 0.02 * shakeIntensity;
+                        carData.container.rotation.z = shake;
+                    } else {
+                        carData.container.rotation.z *= 0.9;
+                    }
+                }
+            });
+
+            // Actualizar UI solo si estamos viendo el menú de música
+            if (currentAudioTarget && loadedCars[currentAudioTarget]) {
+                const bassLevel = getBassLevel(currentAudioTarget);
+                bassLevelSpan.textContent = Math.floor(bassLevel * 100);
+            }
+        }
+
+        function checkCarCollision(newPosition) {
+            if (!isPlayerMode) return false;
+
+            const playerRadius = 0.5;
+
+            // Verificar colisión con TODOS los autos dinámicamente
+            for (const carData of Object.values(loadedCars)) {
+                if (carData.collisionBox && carData.container) {
+                    const carPos = carData.container.position;
+                    const carRot = carData.container.rotation.y;
+
+                    const dx = newPosition.x - carPos.x;
+                    const dz = newPosition.z - carPos.z;
+
+                    const localX = dx * Math.cos(-carRot) - dz * Math.sin(-carRot);
+                    const localZ = dx * Math.sin(-carRot) + dz * Math.cos(-carRot);
+
+                    const halfWidth = carData.collisionBox.width / 2;
+                    const halfLength = carData.collisionBox.length / 2;
+
+                    if (Math.abs(localX) < halfWidth + playerRadius &&
+                        Math.abs(localZ) < halfLength + playerRadius) {
+                        return true; // Colisión detectada
+                    }
+                }
+            }
+
+            return false; // Sin colisión
+        }
+
+        // 7. CONTROLES
+        window.addEventListener('keydown', (e) => {
+            const key = e.key.toLowerCase();
+
+            if (key === 'w') moveForward.active = true;
+            if (key === 's') moveBackward.active = true;
+            if (key === 'a') moveLeft.active = true;
+            if (key === 'd') moveRight.active = true;
+
+            if (e.key === 'ArrowUp') moveForward.active = true;
+            if (e.key === 'ArrowDown') moveBackward.active = true;
+            if (e.key === 'ArrowLeft') moveLeft.active = true;
+            if (e.key === 'ArrowRight') moveRight.active = true;
+
+            // Nitro con Shift (solo cuando estás manejando)
+            if (e.key === 'Shift' && !isPlayerMode && carRole === 'driver') {
+                shiftKeyPressed = true;
+            }
+
+            if (key === 'l') {
+                // Abrir/cerrar menú de configuración gráfica
+                const graphicsMenu = document.getElementById('graphicsMenu');
+                if (graphicsMenu.style.display === 'none' || !graphicsMenu.style.display) {
+                    graphicsMenu.style.display = 'block';
+                    isMusicMenuOpen = true;
+                    controls.unlock();
+                } else {
+                    graphicsMenu.style.display = 'none';
+                    isMusicMenuOpen = false;
+                }
+            }
+
+            if (key === 'f') {
+                let targetCar = null;
+
+                // Si estamos dentro de un auto, siempre usar ese auto para el menú
+                if (!isPlayerMode && currentCarId && loadedCars[currentCarId] && loadedCars[currentCarId].container) {
+                    targetCar = loadedCars[currentCarId];
+                } else {
+                    // Modo jugador: detectar auto más cercano para abrir su menú de música
+                    const playerPos = controls.getObject().position;
+
+                    let closestCar = null;
+                    let closestDistance = Infinity;
+
+                    // Buscar en todos los autos cargados
+                    Object.values(loadedCars).forEach(carData => {
+                        if (carData.container) {
+                            const distance = playerPos.distanceTo(carData.container.position);
+                            if (distance < closestDistance) {
+                                closestDistance = distance;
+                                closestCar = carData;
+                            }
+                        }
+                    });
+
+                    // Solo permitir menú si estás cerca de un auto (dentro de 10 unidades)
+                    if (closestCar && closestDistance < 10) {
+                        targetCar = closestCar;
+                    }
+                }
+
+                // Si no hay ningún auto válido, no abrir el menú
+                if (!targetCar) {
+                    return;
+                }
+
+                currentAudioTarget = targetCar.id;
+                document.querySelector('#musicMenu h2').textContent = `🎵 Radio ${targetCar.name} - Bass Boost 🎵`;
+
+                // Obtener valores actuales del auto (prioridad: valores actuales > estado guardado > valores por defecto)
+                const audioObj = loadedCars[currentAudioTarget] ? loadedCars[currentAudioTarget].audio : null;
+                const state = carMusicState[currentAudioTarget];
+                
+                // Obtener volumen: primero del objeto de audio actual, luego del estado, luego default
+                const vol = (audioObj && typeof audioObj.maxVolume === 'number')
+                    ? audioObj.maxVolume
+                    : (state && typeof state.volume === 'number')
+                        ? state.volume
+                        : 1.0;
+
+                // Obtener sensibilidad: primero del objeto de audio actual, luego del estado, luego default
+                const sens = (audioObj && typeof audioObj.bassSensitivity === 'number')
+                    ? audioObj.bassSensitivity
+                    : (state && typeof state.bassSensitivity === 'number')
+                        ? state.bassSensitivity
+                        : 0.5;
+
+                // Obtener URL: del estado guardado
+                musicUrl.value = (state && state.url) ? state.url : '';
+
+                // Actualizar sliders con los valores actuales
+                volumeSlider.value = Math.round(vol * 100);
+                volumeValue.textContent = volumeSlider.value;
+                bassSensitivitySlider.value = Math.round(sens * 100);
+                bassValue.textContent = bassSensitivitySlider.value;
+
+                // Asegurar que el objeto de audio tenga los valores correctos
+                if (audioObj) {
+                    audioObj.maxVolume = vol;
+                    audioObj.bassSensitivity = sens;
+                    if (audioObj.audioElement) {
+                        audioObj.audioElement.volume = vol;
+                    }
+                }
+
+                if (musicMenu.style.display === 'none' || !musicMenu.style.display) {
+                    musicMenu.style.display = 'block';
+                    isMusicMenuOpen = true;
+                    controls.unlock();
+                } else {
+                    musicMenu.style.display = 'none';
+                    isMusicMenuOpen = false;
+                }
+            }
+
+            if ((key === 'e' || e.key === 'Enter') && Object.keys(loadedCars).length > 0) {
+                const playerPos = controls.getObject().position;
+
+                // Función para encontrar el auto más cercano dinámicamente
+                function getClosestCar() {
+                    let closestCar = null;
+                    let closestDistance = Infinity;
+
+                    Object.values(loadedCars).forEach(carData => {
+                        if (carData.container) {
+                            const distance = playerPos.distanceTo(carData.container.position);
+                            if (distance < closestDistance) {
+                                closestDistance = distance;
+                                closestCar = carData;
+                            }
+                        }
+                    });
+
+                    return { car: closestCar, distance: closestDistance };
+                }
+
+                const { car: selectedCarData, distance: closestDistance } = getClosestCar();
+
+                if (isPlayerMode && selectedCarData && closestDistance < 6) {
+
+                    // Intentar subir al auto más cercano
+                    checkCarAvailability(selectedCarData.id).then(result => {
+                        if (!result.canJoin) {
+                            document.getElementById('status').innerText = '❌ Auto lleno (máximo 4 personas)';
+                            setTimeout(() => {
+                                document.getElementById('status').innerText = 'Modo Jugador - F para música';
+                            }, 2000);
+                            return;
+                        }
+
+                        // Subirse al auto con el rol asignado
+                        carRole = result.role;
+                        currentCarId = selectedCarData.id;
+                        isPlayerMode = false;
+
+                        // Establecer el auto activo
+                        activeCarContainer = selectedCarData.container;
+                        activeCarCollisionBox = selectedCarData.collisionBox;
+                        activeCarBaseY = selectedCarData.baseY;
+
+                        // Actualizar variables legacy si es car1 o car2
+                        if (selectedCarData.id === 'car1') {
+                            carContainer = selectedCarData.container;
+                            carCollisionBox = selectedCarData.collisionBox;
+                            carBaseY = selectedCarData.baseY;
+                        } else if (selectedCarData.id === 'car2') {
+                            car2Container = selectedCarData.container;
+                            car2CollisionBox = selectedCarData.collisionBox;
+                            car2BaseY = selectedCarData.baseY;
+                        }
+
+                        controls.unlock();
+                        carSpeed = 0;
+                        carRotation = selectedCarData.container.rotation.y;
+
+                        const camPos = controls.getObject().position.clone();
+                        scene.remove(controls.getObject());
+                        camera.position.copy(camPos);
+                        scene.add(camera);
+
+                        if (carRole === 'driver') {
+                            document.getElementById('mode').innerText = `${selectedCarData.name} (Conductor)`;
+                            document.getElementById('status').innerText = '🚗 Manejando - F para música';
+                        } else {
+                            document.getElementById('mode').innerText = `${selectedCarData.name} (Pasajero)`;
+                            document.getElementById('status').innerText = '🪑 Pasajero - Solo disfrutas el viaje';
+                        }
+
+                        // Registrar en Firebase
+                        if (isOnline) {
+                            const occupantRef = ref(database, `carGame/${selectedCarData.id}Occupants/${currentPlayerId}`);
+                            set(occupantRef, {
+                                playerId: currentPlayerId,
+                                playerName: currentPlayerName,
+                                role: carRole,
+                                carId: selectedCarData.id,
+                                timestamp: Date.now()
+                            });
+                            onDisconnect(occupantRef).remove();
+                        }
+                    });
+                } else if (!isPlayerMode && activeCarContainer) {
+                    // Bajarse del auto
+                    isPlayerMode = true;
+                    carRole = null;
+                    const wasCarId = currentCarId; // Guardar antes de resetear
+                    currentCarId = null;
+
+                    // Calcular posición segura FUERA del auto (más lejos para evitar colisión)
+                    const safeDistance = 6; // Distancia segura fuera del auto
+                    const carRotation = activeCarContainer.rotation.y;
+
+                    // Posicionar al jugador a un lado del auto
+                    const exitX = activeCarContainer.position.x + Math.cos(carRotation) * safeDistance;
+                    const exitZ = activeCarContainer.position.z + Math.sin(carRotation) * safeDistance;
+
+                    scene.remove(camera);
+                    controls.getObject().position.set(
+                        exitX,
+                        1.7,
+                        exitZ
+                    );
+                    scene.add(controls.getObject());
+
+                    document.getElementById('mode').innerText = 'Jugador';
+                    document.getElementById('status').innerText = 'Modo Jugador - F para música';
+
+                    // Resetear auto activo
+                    activeCarContainer = null;
+                    activeCarCollisionBox = null;
+
+                    // Eliminar de Firebase DE LA REFERENCIA CORRECTA
+                    if (isOnline) {
+                        remove(ref(database, `carGame/${wasCarId}Occupants/${currentPlayerId}`));
+                    }
+                }
+            }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            const key = e.key.toLowerCase();
+
+            if (key === 'w') moveForward.active = false;
+            if (key === 's') moveBackward.active = false;
+            if (key === 'a') moveLeft.active = false;
+            if (key === 'd') moveRight.active = false;
+
+            if (e.key === 'ArrowUp') moveForward.active = false;
+            if (e.key === 'ArrowDown') moveBackward.active = false;
+            if (e.key === 'ArrowLeft') moveLeft.active = false;
+            if (e.key === 'ArrowRight') moveRight.active = false;
+
+            // Soltar Nitro
+            if (e.key === 'Shift') {
+                shiftKeyPressed = false;
+                isNitroActive = false;
+            }
+        });
+
+        let carSpeed = 0;
+        let carRotation = 0;
+
+        // Sistema de Nitro
+        let nitroAmount = 200; // Nitro inicial (0-200)
+        const NITRO_MAX = 200; // Aumentado para más nitro
+        const NITRO_CONSUMPTION_RATE = 1.5; // Porcentaje consumido por frame (reducido)
+        const NITRO_RECHARGE_RATE = 1.2; // Porcentaje recargado por frame (aumentado)
+        const NITRO_BOOST = 1.4; // Multiplicador de velocidad (reducido para evitar salirse del mapa)
+        const MAX_CAR_SPEED = 0.8; // Velocidad máxima del auto (con nitro)
+        let isNitroActive = false;
+        let shiftKeyPressed = false;
+
+        let frameDelta = 1 / 60;
+        let lastFrameTime = performance.now();
+        const carNetVelocity = new THREE.Vector3(0, 0, 0);
+        const CAR_NET_SPRING = 55;
+        const CAR_NET_DAMPING = 12;
+
+        const velocity = new THREE.Vector3();
+        const direction = new THREE.Vector3();
+
+        // Función para interpolar suavemente otros jugadores (OPTIMIZADA)
+        function interpolateOtherPlayers() {
+            // Rastrear QUÉ JUGADOR está manejando QUÉ AUTO dinámicamente
+            const carDrivingData = {};
+            const lerpFactor = 0.15;
+            const velocityDecay = 0.9;
+            const predictionTime = 0.12;
+
+            Object.keys(otherPlayers).forEach(playerId => {
+                const player = otherPlayers[playerId];
+                if (player.targetPos && player.model) {
+                    // Optimizar: reutilizar cálculos
+                    const velScaled = player.velocity.clone().multiplyScalar(predictionTime);
+                    const predictedPos = player.targetPos.clone().add(velScaled);
+
+                    // Interpolar posición del jugador caminando
+                    player.model.position.lerp(predictedPos, lerpFactor);
+
+                    // Si está en modo auto, guardar datos para ESTE auto específico
+                    if (player.data.mode === 'car') {
+                        const playerCarId = player.data.carId || 'car1';
+                        carDrivingData[playerCarId] = {
+                            predictedPos: predictedPos,
+                            rotation: player.targetRotation,
+                            carId: playerCarId
+                        };
+                    }
+
+                    // Reducir velocidad gradualmente
+                    player.velocity.multiplyScalar(velocityDecay);
+                }
+            });
+
+            // Controlar TODOS los autos dinámicamente
+            Object.values(loadedCars).forEach(carData => {
+                if (carData.container) {
+                    // Si YO estoy manejando ESTE auto, no sobre-escribir
+                    if (!isPlayerMode && carRole === 'driver' && currentCarId === carData.id) {
+                        // YO lo manejo, skip
+                        return;
+                    }
+                    
+                    if (carDrivingData[carData.id]) {
+                        // OTRO jugador lo está manejando
+                        const drivingData = carDrivingData[carData.id];
+                        const carTarget = drivingData.predictedPos;
+                        const carPos = carData.container.position;
+
+                        const dx = carTarget.x - carPos.x;
+                        const dz = carTarget.z - carPos.z;
+
+                        carNetVelocity.x += dx * CAR_NET_SPRING * frameDelta;
+                        carNetVelocity.z += dz * CAR_NET_SPRING * frameDelta;
+
+                        const dampingFactor = Math.exp(-CAR_NET_DAMPING * frameDelta);
+                        carNetVelocity.x *= dampingFactor;
+                        carNetVelocity.z *= dampingFactor;
+
+                        carData.container.position.x += carNetVelocity.x * frameDelta;
+                        carData.container.position.z += carNetVelocity.z * frameDelta;
+
+                        // Optimizar rotación
+                        const currentRot = carData.container.rotation.y;
+                        const targetRot = drivingData.rotation;
+                        let rotDiff = targetRot - currentRot;
+                        // Normalizar ángulo
+                        if (rotDiff > Math.PI) rotDiff -= Math.PI * 2;
+                        if (rotDiff < -Math.PI) rotDiff += Math.PI * 2;
+                        carData.container.rotation.y = currentRot + rotDiff * lerpFactor;
+                    }
+                }
+            });
+        }
+
+        // Variables para optimización
+        let lastStatusUpdate = 0;
+        const STATUS_UPDATE_INTERVAL = 500; // Actualizar status cada 500ms
+        let lastClosestCarCheck = 0;
+        const CLOSEST_CAR_CHECK_INTERVAL = 200; // Verificar auto cercano cada 200ms
+        let cachedClosestCar = null;
+        let cachedClosestDistance = Infinity;
+        
+        // Variables para LOD y visibilidad
+        let lastLODUpdate = 0;
+        const LOD_UPDATE_INTERVAL = 100; // Actualizar LOD cada 100ms
+        let LOD_DISTANCE_NEAR = 30; // Distancia cercana (calidad máxima)
+        let LOD_DISTANCE_MID = 60; // Distancia media (calidad media)
+        let LOD_DISTANCE_FAR = 100; // Distancia lejana (calidad baja)
+        let VISIBILITY_DISTANCE = 150; // Distancia máxima de visibilidad
+
+        // 8. LOOP DE ANIMACIÓN
+        function update() {
+            requestAnimationFrame(update);
+
+            const now = performance.now();
+            frameDelta = Math.min(0.05, (now - lastFrameTime) / 1000);
+            lastFrameTime = now;
+
+            if (isPlayerMode) {
+                direction.z = Number(moveForward.active) - Number(moveBackward.active);
+                direction.x = Number(moveRight.active) - Number(moveLeft.active);
+                
+                // Solo normalizar si hay movimiento
+                if (direction.x !== 0 || direction.z !== 0) {
+                    direction.normalize();
+                }
+
+                if (moveForward.active || moveBackward.active) {
+                    velocity.z = direction.z * playerSpeed;
+                } else {
+                    velocity.z = 0;
+                }
+
+                if (moveLeft.active || moveRight.active) {
+                    velocity.x = direction.x * playerSpeed;
+                } else {
+                    velocity.x = 0;
+                }
+
+                // Solo verificar colisión si hay movimiento
+                if (velocity.x !== 0 || velocity.z !== 0) {
+                    const currentPos = controls.getObject().position.clone();
+                    controls.moveRight(velocity.x);
+                    controls.moveForward(velocity.z);
+                    const newPos = controls.getObject().position;
+                    if (checkCarCollision(newPos)) {
+                        controls.getObject().position.copy(currentPos);
+                    }
+                }
+
+                controls.getObject().position.y = 1.7;
+
+                // Optimizar: solo buscar auto cercano cada cierto tiempo
+                if (now - lastClosestCarCheck > CLOSEST_CAR_CHECK_INTERVAL) {
+                    lastClosestCarCheck = now;
+                    cachedClosestCar = null;
+                    cachedClosestDistance = Infinity;
+
+                    // Buscar el auto más cercano dinámicamente
+                    Object.values(loadedCars).forEach(carData => {
+                        if (carData.container) {
+                            const distance = controls.getObject().position.distanceTo(carData.container.position);
+                            if (distance < cachedClosestDistance) {
+                                cachedClosestDistance = distance;
+                                cachedClosestCar = carData;
+                            }
+                        }
+                    });
+                }
+
+                // Actualizar status solo cada cierto tiempo para reducir DOM updates
+                if (now - lastStatusUpdate > STATUS_UPDATE_INTERVAL) {
+                    lastStatusUpdate = now;
+                    const statusEl = document.getElementById('status');
+                    if (cachedClosestDistance < 5 && cachedClosestCar) {
+                        statusEl.innerText = `Presiona E para entrar al ${cachedClosestCar.name}`;
+                    } else if (statusEl.innerText.includes('Presiona E')) {
+                        statusEl.innerText = 'Modo Jugador - F para música';
+                    }
+                }
+
+            } else {
+                if (activeCarContainer && carRole === 'driver') {
+                    // Solo el conductor puede controlar el auto
+                    if (moveForward.active) carSpeed += 0.01;
+                    if (moveBackward.active) carSpeed -= 0.01;
+                    if (moveLeft.active) carRotation += 0.03;
+                    if (moveRight.active) carRotation -= 0.03;
+
+                    // Sistema de Nitro
+                    const nitroBarContainer = document.getElementById('nitroBarContainer');
+                    const nitroBar = document.getElementById('nitroBar');
+                    const speedEffect = document.getElementById('speedEffect');
+
+                    // Mostrar barra de nitro cuando estás manejando
+                    nitroBarContainer.style.display = 'block';
+
+                    // Activar nitro si Shift está presionado y hay nitro disponible
+                    if (shiftKeyPressed && nitroAmount > 0 && moveForward.active) {
+                        isNitroActive = true;
+                        nitroAmount = Math.max(0, nitroAmount - NITRO_CONSUMPTION_RATE * frameDelta * 60);
+                        
+                        // Aplicar boost de velocidad (limitado)
+                        const speedBoost = 1 + (NITRO_BOOST - 1) * (nitroAmount / NITRO_MAX);
+                        carSpeed *= speedBoost;
+                        
+                        // Limitar velocidad máxima
+                        if (carSpeed > MAX_CAR_SPEED) {
+                            carSpeed = MAX_CAR_SPEED;
+                        }
+                        
+                        // Efectos visuales
+                        nitroBarContainer.classList.add('active');
+                        speedEffect.classList.add('active');
+                        
+                        // Efecto de cámara (ligero zoom y movimiento)
+                        camera.fov = THREE.MathUtils.lerp(camera.fov, 72, 0.1);
+                        camera.updateProjectionMatrix();
+                    } else {
+                        isNitroActive = false;
+                        nitroBarContainer.classList.remove('active');
+                        speedEffect.classList.remove('active');
+                        
+                        // Restaurar FOV normal
+                        camera.fov = THREE.MathUtils.lerp(camera.fov, 75, 0.1);
+                        camera.updateProjectionMatrix();
+                        
+                        // Recargar nitro si no está activo
+                        if (nitroAmount < NITRO_MAX) {
+                            nitroAmount = Math.min(NITRO_MAX, nitroAmount + NITRO_RECHARGE_RATE * frameDelta * 60);
+                        }
+                    }
+
+                    // Actualizar barra de nitro
+                    // Actualizar barra de nitro (convertir de 0-200 a 0-100%)
+                    nitroBar.style.width = `${(nitroAmount / NITRO_MAX) * 100}%`;
+
+                    // Fricción normal (más fricción cuando se usa nitro para control)
+                    const friction = isNitroActive ? 0.92 : 0.95;
+                    carSpeed *= friction;
+                    
+                    // Límite de velocidad adicional (seguridad)
+                    if (Math.abs(carSpeed) > MAX_CAR_SPEED) {
+                        carSpeed = Math.sign(carSpeed) * MAX_CAR_SPEED;
+                    }
+
+                    activeCarContainer.rotation.y = carRotation;
+                    const sinRot = Math.sin(carRotation);
+                    const cosRot = Math.cos(carRotation);
+                    activeCarContainer.position.x += sinRot * carSpeed;
+                    activeCarContainer.position.z += cosRot * carSpeed;
+
+                    // Optimizar: reutilizar cálculos trigonométricos
+                    const camOffset = new THREE.Vector3(
+                        activeCarContainer.position.x - sinRot * 12,
+                        activeCarContainer.position.y + 5,
+                        activeCarContainer.position.z - cosRot * 12
+                    );
+                    camera.position.lerp(camOffset, 0.1);
+                    camera.lookAt(activeCarContainer.position);
+                } else if (activeCarContainer && carRole === 'passenger') {
+                    // Pasajero: cámara sigue el auto pero no controla
+                    carSpeed *= 0.95;
+                    carRotation = activeCarContainer.rotation.y;
+                    const sinRot = Math.sin(carRotation);
+                    const cosRot = Math.cos(carRotation);
+
+                    const camOffset = new THREE.Vector3(
+                        activeCarContainer.position.x - sinRot * 12,
+                        activeCarContainer.position.y + 5,
+                        activeCarContainer.position.z - cosRot * 12
+                    );
+                    camera.position.lerp(camOffset, 0.1);
+                    camera.lookAt(activeCarContainer.position);
+                } else {
+                    // Ocultar barra de nitro cuando no estás en un auto
+                    document.getElementById('nitroBarContainer').style.display = 'none';
+                    document.getElementById('speedEffect').classList.remove('active');
+                }
+            }
+            
+            // Ocultar barra de nitro cuando estás en modo jugador (si no estás en auto)
+            if (isPlayerMode) {
+                document.getElementById('nitroBarContainer').style.display = 'none';
+                document.getElementById('speedEffect').classList.remove('active');
+            }
+
+            // Actualizar efectos de audio (optimizado: solo si hay audio activo)
+            let hasActiveAudio = false;
+            Object.values(loadedCars).forEach(carData => {
+                if (carData.audio && carData.audio.isPlaying) {
+                    hasActiveAudio = true;
+                }
+            });
+            
+            if (hasActiveAudio) {
+                updateAudioVolume();
+                updateCarBounce();
+            }
+
+            // Interpolar posiciones de otros jugadores para movimiento suave
+            if (Object.keys(otherPlayers).length > 0) {
+                interpolateOtherPlayers();
+            }
+
+            // Actualizar LOD y visibilidad (optimizado: solo cada cierto tiempo)
+            if (now - lastLODUpdate > LOD_UPDATE_INTERVAL) {
+                lastLODUpdate = now;
+                updateLODAndVisibility();
+            }
+
+            // Actualizar posición en multiplayer
+            updateMyPosition();
+
+            renderer.render(scene, camera);
+        }
+
+        // Función para actualizar LOD y visibilidad basado en distancia
+        function updateLODAndVisibility() {
+            // Obtener posición del jugador
+            let playerPos;
+            if (isPlayerMode) {
+                playerPos = controls.getObject().position;
+            } else if (activeCarContainer) {
+                playerPos = activeCarContainer.position;
+            } else {
+                return;
+            }
+
+            // Actualizar LOD de autos
+            Object.values(loadedCars).forEach(carData => {
+                if (carData.container && carData.container.userData.meshes) {
+                    const distance = playerPos.distanceTo(carData.container.position);
+                    
+                    // Si está muy lejos, ocultar completamente
+                    if (distance > VISIBILITY_DISTANCE) {
+                        carData.container.visible = false;
+                        return;
+                    }
+                    
+                    carData.container.visible = true;
+                    
+                    // Aplicar LOD basado en distancia
+                    const meshes = carData.container.userData.meshes;
+                    meshes.forEach((mesh, index) => {
+                        if (!mesh.material) return;
+                        
+                        // Mantener sombras activas siempre (solo desactivar si está muy muy lejos)
+                        // Las sombras son importantes visualmente, así que las mantenemos activas
+                        if (distance > VISIBILITY_DISTANCE * 1.5) {
+                            // Solo desactivar sombras si está extremadamente lejos
+                            mesh.castShadow = false;
+                            mesh.receiveShadow = false;
+                        } else {
+                            // Mantener sombras activas en la mayoría de casos
+                            mesh.castShadow = true;
+                            mesh.receiveShadow = true;
+                        }
+                        
+                        // Reducir calidad de geometría a distancia (simplificar materiales) pero mantener sombras
+                        if (distance > LOD_DISTANCE_FAR) {
+                            // Muy lejos: mantener sombras pero simplificar material
+                            if (mesh.material && mesh.material.isMeshStandardMaterial) {
+                                mesh.material.roughness = 1.0; // Material más simple
+                            }
+                        } else {
+                            // Restaurar material original si está disponible
+                            if (mesh.material && carData.container.userData.originalMaterials) {
+                                const originalMat = carData.container.userData.originalMaterials[index];
+                                if (originalMat) {
+                                    mesh.material = originalMat;
+                                }
+                            }
+                        }
+                    });
+                }
+            });
+
+            // Actualizar visibilidad de árboles
+            trees.forEach(tree => {
+                const distance = playerPos.distanceTo(tree.position);
+                if (distance > VISIBILITY_DISTANCE) {
+                    tree.visible = false;
+                } else {
+                    tree.visible = true;
+                    // Mantener sombras activas (solo desactivar si está muy lejos)
+                    tree.traverse(child => {
+                        if (child.isMesh) {
+                            child.castShadow = distance < VISIBILITY_DISTANCE * 1.2;
+                        }
+                    });
+                }
+            });
+
+            // Actualizar visibilidad de flores
+            flowers.forEach(flower => {
+                const distance = playerPos.distanceTo(flower.position);
+                if (distance > VISIBILITY_DISTANCE * 0.7) { // Flores desaparecen antes
+                    flower.visible = false;
+                } else {
+                    flower.visible = true;
+                    // Mantener sombras activas para flores también
+                    flower.castShadow = distance < VISIBILITY_DISTANCE;
+                }
+            });
+
+            // Actualizar visibilidad de nubes (siempre visibles pero sin sombras a distancia)
+            clouds.forEach(cloud => {
+                const distance = playerPos.distanceTo(cloud.position);
+                cloud.visible = distance < VISIBILITY_DISTANCE * 2; // Nubes se ven desde más lejos
+                cloud.traverse(child => {
+                    if (child.isMesh) {
+                        // Mantener sombras de nubes activas también
+                        child.castShadow = distance < VISIBILITY_DISTANCE * 1.5;
+                    }
+                });
+            });
+        }
+
+        update();
+
+        window.onresize = () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        };
+    </script>
+</body>
+
+</html>
