@@ -270,6 +270,18 @@
             margin-top: 3px;
         }
 
+        /* Coordenadas para ubicación de props */
+        #coordsDisplay {
+            margin-top: 10px;
+            padding: 8px;
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid #00ff88;
+            border-radius: 5px;
+            font-family: monospace;
+            color: #00ff88;
+            display: none;
+        }
+
         /* Menú de Configuración Gráfica */
         #graphicsMenu {
             position: absolute;
@@ -401,6 +413,7 @@
             0% {
                 transform: translateY(0) scaleY(1);
             }
+
             100% {
                 transform: translateY(-20px) scaleY(1.1);
             }
@@ -418,6 +431,7 @@
         <b>Música del Auto:</b> F<br>
         <b>Configuración Gráfica:</b> L<br>
         <span id="status">Cargando modelo...</span><br>
+        <div id="coordsDisplay">📍 X: 0.00 | Y: 0.00 | Z: 0.00</div>
         <span id="musicInfo" style="color: #00ff88;"></span>
     </div>
     <div id="crosshair"></div>
@@ -591,7 +605,7 @@
             gainNode: null,
             bounce: 0
         };
-          let car5Audio = {
+        let car5Audio = {
             analyser: null,
             dataArray: null,
             audioSource: null,
@@ -602,7 +616,7 @@
             gainNode: null,
             bounce: 0
         };
-          let car6Audio = {
+        let car6Audio = {
             analyser: null,
             dataArray: null,
             audioSource: null,
@@ -621,7 +635,7 @@
             {
                 id: 'car1',
                 name: 'El azul',
-                modelUrl: 'https://raw.githubusercontent.com/yoyoyogogo/juego/main/music%20car%203d%20model%20(2).glb',
+                modelUrl: 'https://raw.githubusercontent.com/chipeosimulator/Modelos/main/elazul.glb',
                 position: { x: 0, y: 1.7, z: -10 },
                 rotation: { x: 0, y: -Math.PI / 2, z: 0 }, // -90° para que mire adelante como en la versión anterior
                 scale: 1.5,
@@ -630,7 +644,7 @@
             {
                 id: 'car2',
                 name: 'La camiona',
-                modelUrl: 'https://raw.githubusercontent.com/yoyoyogogo/camion/main/Sin_nombre.glb',
+                modelUrl: 'https://raw.githubusercontent.com/chipeosimulator/Modelos/main/LaCamiona.glb',
                 position: { x: 5, y: 2.5, z: -10 },
                 rotation: { x: 0, y: -Math.PI / 2, z: 0 }, // -90° para que mire adelante
                 scale: 2.4,
@@ -639,7 +653,7 @@
             {
                 id: 'car3',
                 name: 'El neforepi',
-                modelUrl: 'https://raw.githubusercontent.com/yoyoyogogo/GTR-M3-/main/racing%20car%203d%20model.glb',
+                modelUrl: 'https://raw.githubusercontent.com/chipeosimulator/Modelos/main/Elneforepi.glb',
                 position: { x: 15, y: 1.5, z: -10 },
                 rotation: { x: 0, y: 0, z: 0 }, // Ajustado para que mire hacia adelante
                 scale: 1.5,
@@ -648,9 +662,9 @@
             {
                 id: 'car4',
                 name: 'El dorado',
-                modelUrl: 'https://raw.githubusercontent.com/yoyoyogogo/camionadora/main/speaker%20rig%20car%203d%20model.glb',
+                modelUrl: 'https://raw.githubusercontent.com/chipeosimulator/Modelos/main/Eldorado.glb',
                 position: { x: 20, y: 3.5, z: -10 },
-                rotation: { x: 0, y: -Math.PI /2, z: 0 }, // Ajustado para que mire hacia adelante
+                rotation: { x: 0, y: -Math.PI / 2, z: 0 }, // Ajustado para que mire hacia adelante
                 scale: 2,
                 audio: car4Audio
             },
@@ -659,16 +673,16 @@
                 name: 'El Pebeseta',
                 modelUrl: 'https://raw.githubusercontent.com/yoyoyogogo/pebeseta/main/stylized%20plant%203d%20model.glb',
                 position: { x: 25, y: 1.5, z: -10 },
-                rotation: { x: 0, y: -Math.PI /2, z: 0 }, // Ajustado para que mire hacia adelante
+                rotation: { x: 0, y: -Math.PI / 2, z: 0 }, // Ajustado para que mire hacia adelante
                 scale: 1,
                 audio: car5Audio
             },
             {
                 id: 'car6',
                 name: 'El azulbug',
-                modelUrl: 'https://raw.githubusercontent.com/yoyoyogogo/otrocar/main/rooftop%20speaker%20car%203d%20model.glb',
+                modelUrl: 'https://raw.githubusercontent.com/chipeosimulator/Modelos/main/Elazulbug.glb',
                 position: { x: 30, y: 3.5, z: -10 },
-                rotation: { x: 0, y: -Math.PI /2, z: 0 }, // Ajustado para que mire hacia adelante
+                rotation: { x: 0, y: -Math.PI / 2, z: 0 }, // Ajustado para que mire hacia adelante
                 scale: 2,
                 audio: car6Audio
             }
@@ -684,6 +698,40 @@
             // }
         ];
 
+        // ========================================
+        // 🏗️ CONFIGURACIÓN DE DECORACIONES (OBJETOS)
+        // ========================================
+        // Agrega aquí edificios, sillas, farolas, etc.
+        const decorationsConfig = [
+            {
+                id: 'ejemplo_edificio',
+                name: 'Edificio de Prueba',
+                modelUrl: 'https://raw.githubusercontent.com/chipeosimulator/Modelos/main/Sillaplastica.glb', // Usando link de auto como ejemplo
+                position: { x: -2.73, y: 0.3, z: 11.97 },
+                rotation: { x: 0, y: 0, z: 0 },
+                scale: 1.5,
+                hasCollision: true
+            },
+            {
+                id: 'ejemplo_edificio1',
+                name: 'Edificio de Prueba',
+                modelUrl: 'https://raw.githubusercontent.com/chipeosimulator/Modelos/main/colmados.glb', // Usando link de auto como ejemplo
+                position: { x: -6.79, y: 2.5, z: 14.25 },
+                rotation: { x: 0, y: 0, z: 0 },
+                scale: 8,
+                hasCollision: false
+            }
+            // {
+            //     id: 'silla1',
+            //     name: 'Silla',
+            //     modelUrl: 'URL_MODELO_SILLA.glb',
+            //     position: { x: 10, y: 0, z: 10 },
+            //     rotation: { x: 0, y: 0, z: 0 },
+            //     scale: 1,
+            //     hasCollision: false
+            // }
+        ];
+
         // Crear elementos de audio HTML para cada auto (SIN Web Audio API - sin CORS issues)
         carsConfig.forEach(config => {
             const audioElement = document.createElement('audio');
@@ -694,8 +742,9 @@
             console.log(`🔊 Elemento de audio creado para ${config.name}`);
         });
 
-        // Array para almacenar referencias a autos cargados
+        // Array para almacenar referencias a autos y decoraciones cargadas
         const loadedCars = {};
+        const loadedDecorations = {};
         const carMusicState = {};
 
         // Auto activo en el menú de música
@@ -715,7 +764,7 @@
         scene.background = new THREE.Color(0x87ceeb);
         scene.fog = new THREE.Fog(0x87ceeb, 150, 400);
 
-        const renderer = new THREE.WebGLRenderer({ 
+        const renderer = new THREE.WebGLRenderer({
             antialias: true,
             powerPreference: "high-performance", // Optimizar para rendimiento
             stencil: false, // Desactivar stencil si no se usa
@@ -730,33 +779,33 @@
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5)); // Limitar pixel ratio para mejor rendimiento
         document.body.appendChild(renderer.domElement);
 
-// 2. CÁMARA
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.set(0, 2, 5);
+        // 2. CÁMARA
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 2, 5);
 
-// 3. CONTROLES DE POINTER LOCK
-const controls = new PointerLockControls(camera, document.body);
-scene.add(controls.getObject());
+        // 3. CONTROLES DE POINTER LOCK
+        const controls = new PointerLockControls(camera, document.body);
+        scene.add(controls.getObject());
 
-let isPlayerMode = true;
-let isMusicMenuOpen = false;
-const playerSpeed = 0.15;
+        let isPlayerMode = true;
+        let isMusicMenuOpen = false;
+        const playerSpeed = 0.15;
 
-const playerRadius = 0.6; // Aumentado el radio de entrada al vehículo
-const moveForward = { active: false };
-const moveBackward = { active: false };
-const moveLeft = { active: false };
-const moveRight = { active: false };
+        const playerRadius = 0.6; // Aumentado el radio de entrada al vehículo
+        const moveForward = { active: false };
+        const moveBackward = { active: false };
+        const moveLeft = { active: false };
+        const moveRight = { active: false };
 
-document.addEventListener('click', () => {
-    if (isPlayerMode && !controls.isLocked && !isMusicMenuOpen) {
-        controls.lock();
-    }
-});
+        document.addEventListener('click', () => {
+            if (isPlayerMode && !controls.isLocked && !isMusicMenuOpen) {
+                controls.lock();
+            }
+        });
 
-controls.addEventListener('lock', () => {
-    document.getElementById('crosshair').style.display = 'block';
-});
+        controls.addEventListener('lock', () => {
+            document.getElementById('crosshair').style.display = 'block';
+        });
         controls.addEventListener('unlock', () => {
             document.getElementById('crosshair').style.display = 'none';
         });
@@ -785,7 +834,7 @@ controls.addEventListener('lock', () => {
         // Función para aplicar calidad gráfica
         function applyGraphicsQuality(quality) {
             currentGraphicsQuality = quality;
-            
+
             // Remover luces de relleno si existen
             fillLights.forEach(light => {
                 scene.remove(light);
@@ -798,41 +847,41 @@ controls.addEventListener('lock', () => {
                 LOD_DISTANCE_MID = 40;
                 LOD_DISTANCE_FAR = 70;
                 VISIBILITY_DISTANCE = 100;
-                
+
                 // Reducir calidad de sombras
                 sun.shadow.mapSize.width = 1024;
                 sun.shadow.mapSize.height = 1024;
                 sun.shadow.camera.far = 150;
                 ambientLight.intensity = 0.9;
-                
+
                 // Sol en posición normal
                 sun.position.set(50, 50, 50);
                 sun.intensity = 0.8;
-                
+
             } else if (quality === 'normal') {
                 // NORMAL: Configuración estándar
                 LOD_DISTANCE_NEAR = 30;
                 LOD_DISTANCE_MID = 60;
                 LOD_DISTANCE_FAR = 100;
                 VISIBILITY_DISTANCE = 150;
-                
+
                 // Calidad de sombras estándar
                 sun.shadow.mapSize.width = 2048;
                 sun.shadow.mapSize.height = 2048;
                 sun.shadow.camera.far = 200;
                 ambientLight.intensity = 0.8;
-                
+
                 // Sol en posición normal
                 sun.position.set(50, 50, 50);
                 sun.intensity = 1;
-                
+
             } else if (quality === 'high') {
                 // ALTO: Iluminación mejorada con sol centrado
                 LOD_DISTANCE_NEAR = 30;
                 LOD_DISTANCE_MID = 60;
                 LOD_DISTANCE_FAR = 100;
                 VISIBILITY_DISTANCE = 150;
-                
+
                 // Máxima calidad de sombras - ASEGURAR QUE ESTÉN ACTIVAS
                 sun.castShadow = true;
                 sun.shadow.mapSize.width = 2048;
@@ -843,11 +892,11 @@ controls.addEventListener('lock', () => {
                 sun.shadow.camera.top = 100;
                 sun.shadow.camera.bottom = -100;
                 ambientLight.intensity = 1.2;
-                
+
                 // Sol centrado arriba
                 sun.position.set(0, 100, 0);
                 sun.intensity = 0.8;
-                
+
                 // Agregar luces de relleno
                 const fillLight1 = new THREE.DirectionalLight(0xffffff, 0.3);
                 fillLight1.position.set(0, 50, 50);
@@ -872,7 +921,7 @@ controls.addEventListener('lock', () => {
 
             // Actualizar sombras
             sun.shadow.camera.updateProjectionMatrix();
-            
+
             // Actualizar UI del menú
             document.querySelectorAll('.quality-option').forEach(option => {
                 option.classList.remove('selected');
@@ -1106,7 +1155,7 @@ controls.addEventListener('lock', () => {
 
                         container.add(model);
                         container.position.set(config.position.x, config.position.y || 1.5, config.position.z);
-                        
+
                         // Guardar referencia a meshes para LOD
                         container.userData.meshes = meshes;
                         container.userData.originalMaterials = meshes.map(m => m.material);
@@ -1162,24 +1211,83 @@ controls.addEventListener('lock', () => {
             });
         }
 
-        // Cargar todos los autos del array de configuración
-        async function loadAllCars() {
+        // Función para cargar decoraciones
+        function loadDecorationFromConfig(config) {
+            return new Promise((resolve, reject) => {
+                const container = new THREE.Group();
+                scene.add(container);
+
+                const loader = new GLTFLoader();
+                loader.load(
+                    config.modelUrl,
+                    (gltf) => {
+                        const model = gltf.scene;
+
+                        // Centrar y posicionar
+                        const box = new THREE.Box3().setFromObject(model);
+                        const center = box.getCenter(new THREE.Vector3());
+                        model.position.x = -center.x;
+                        model.position.z = -center.z;
+                        model.position.y = -box.min.y;
+
+                        // Aplicar transformaciones
+                        model.rotation.set(config.rotation.x || 0, config.rotation.y || 0, config.rotation.z || 0);
+                        model.scale.set(config.scale, config.scale, config.scale);
+
+                        // Sombras y Optimización
+                        const meshes = [];
+                        model.traverse(n => {
+                            if (n.isMesh) {
+                                n.castShadow = true;
+                                n.receiveShadow = true;
+                                n.frustumCulled = true;
+                                meshes.push(n);
+                            }
+                        });
+
+                        container.add(model);
+                        container.position.set(config.position.x, config.position.y || 0, config.position.z);
+
+                        // Guardar referencia para colisiones y LOD
+                        const finalBox = new THREE.Box3().setFromObject(container);
+                        const size = finalBox.getSize(new THREE.Vector3());
+
+                        loadedDecorations[config.id] = {
+                            id: config.id,
+                            container: container,
+                            meshes: meshes,
+                            originalMaterials: meshes.map(m => m.material),
+                            hasCollision: config.hasCollision,
+                            collisionBox: {
+                                width: size.x * 0.9,
+                                length: size.z * 0.9
+                            }
+                        };
+
+                        resolve();
+                    },
+                    undefined,
+                    reject
+                );
+            });
+        }
+
+        // Iniciar carga de todo
+        async function loadEverything() {
             try {
-                console.log(`🚗 Cargando ${carsConfig.length} autos...`);
+                // Cargar autos
+                await Promise.all(carsConfig.map(config => loadCarFromConfig(config)));
+                // Cargar decoraciones
+                await Promise.all(decorationsConfig.map(config => loadDecorationFromConfig(config)));
 
-                const loadPromises = carsConfig.map(config => loadCarFromConfig(config));
-                await Promise.all(loadPromises);
-
-                console.log('✅ Todos los autos cargados!');
-                document.getElementById('status').innerText = "¡Modelos cargados! Presiona F para la música";
+                document.getElementById('status').innerText = "¡Todo cargado! Presiona F para música";
             } catch (error) {
-                console.error('❌ Error cargando autos:', error);
-                document.getElementById('status').innerText = "Error al cargar algunos autos";
+                console.error('Error cargando elementos:', error);
+                document.getElementById('status').innerText = "Error al cargar elementos";
             }
         }
 
-        // Iniciar carga de autos
-        loadAllCars();
+        loadEverything();
 
         // ===== SISTEMA MULTIPLAYER =====
 
@@ -1913,7 +2021,7 @@ controls.addEventListener('lock', () => {
                         const dz = playerPos.z - carData.container.position.z;
                         const distSq = dx * dx + dy * dy + dz * dz;
                         const dist = Math.sqrt(distSq);
-                        
+
                         if (dist <= minDistance) {
                             volumeFactor = 1;
                         } else if (dist >= maxDistance) {
@@ -1938,7 +2046,7 @@ controls.addEventListener('lock', () => {
             Object.values(loadedCars).forEach(carData => {
                 if (carData.container && carData.audio) {
                     const bassLevel = getBassLevel(carData.id);
-                    
+
                     // Si el bass level es 0, no aplicar rebote y resetear posición
                     if (bassLevel <= 0) {
                         if (typeof carData.audio.bounce !== 'number') {
@@ -2016,7 +2124,26 @@ controls.addEventListener('lock', () => {
 
                     if (Math.abs(localX) < halfWidth + playerRadius &&
                         Math.abs(localZ) < halfLength + playerRadius) {
-                        return true; // Colisión detectada
+                        return true; // Colisión detectada con auto
+                    }
+                }
+            }
+
+            // Verificar colisión con DECORACIONES (Edificios, etc)
+            for (const dec of Object.values(loadedDecorations)) {
+                if (dec.hasCollision && dec.container) {
+                    const pos = dec.container.position;
+                    const rot = dec.container.rotation.y;
+
+                    const dx = newPosition.x - pos.x;
+                    const dz = newPosition.z - pos.z;
+
+                    const localX = dx * Math.cos(-rot) - dz * Math.sin(-rot);
+                    const localZ = dx * Math.sin(-rot) + dz * Math.cos(-rot);
+
+                    if (Math.abs(localX) < (dec.collisionBox.width / 2) + playerRadius &&
+                        Math.abs(localZ) < (dec.collisionBox.length / 2) + playerRadius) {
+                        return true; // Colisión detectada con edificio/prop
                     }
                 }
             }
@@ -2044,14 +2171,18 @@ controls.addEventListener('lock', () => {
             }
 
             if (key === 'l') {
-                // Abrir/cerrar menú de configuración gráfica
+                // Abrir/cerrar menú de configuración gráfica y mostrar coordenadas
                 const graphicsMenu = document.getElementById('graphicsMenu');
+                const coordsDisplay = document.getElementById('coordsDisplay');
+
                 if (graphicsMenu.style.display === 'none' || !graphicsMenu.style.display) {
                     graphicsMenu.style.display = 'block';
+                    coordsDisplay.style.display = 'block'; // Mostrar coordenadas
                     isMusicMenuOpen = true;
                     controls.unlock();
                 } else {
                     graphicsMenu.style.display = 'none';
+                    coordsDisplay.style.display = 'none'; // Ocultar coordenadas
                     isMusicMenuOpen = false;
                 }
             }
@@ -2097,7 +2228,7 @@ controls.addEventListener('lock', () => {
                 // Obtener valores actuales del auto (prioridad: valores actuales > estado guardado > valores por defecto)
                 const audioObj = loadedCars[currentAudioTarget] ? loadedCars[currentAudioTarget].audio : null;
                 const state = carMusicState[currentAudioTarget];
-                
+
                 // Obtener volumen: primero del objeto de audio actual, luego del estado, luego default
                 const vol = (audioObj && typeof audioObj.maxVolume === 'number')
                     ? audioObj.maxVolume
@@ -2347,7 +2478,7 @@ controls.addEventListener('lock', () => {
                         // YO lo manejo, skip
                         return;
                     }
-                    
+
                     if (carDrivingData[carData.id]) {
                         // OTRO jugador lo está manejando
                         const drivingData = carDrivingData[carData.id];
@@ -2387,7 +2518,7 @@ controls.addEventListener('lock', () => {
         const CLOSEST_CAR_CHECK_INTERVAL = 200; // Verificar auto cercano cada 200ms
         let cachedClosestCar = null;
         let cachedClosestDistance = Infinity;
-        
+
         // Variables para LOD y visibilidad
         let lastLODUpdate = 0;
         const LOD_UPDATE_INTERVAL = 100; // Actualizar LOD cada 100ms
@@ -2407,7 +2538,7 @@ controls.addEventListener('lock', () => {
             if (isPlayerMode) {
                 direction.z = Number(moveForward.active) - Number(moveBackward.active);
                 direction.x = Number(moveRight.active) - Number(moveLeft.active);
-                
+
                 // Solo normalizar si hay movimiento
                 if (direction.x !== 0 || direction.z !== 0) {
                     direction.normalize();
@@ -2487,20 +2618,20 @@ controls.addEventListener('lock', () => {
                     if (shiftKeyPressed && nitroAmount > 0 && moveForward.active) {
                         isNitroActive = true;
                         nitroAmount = Math.max(0, nitroAmount - NITRO_CONSUMPTION_RATE * frameDelta * 60);
-                        
+
                         // Aplicar boost de velocidad (limitado)
                         const speedBoost = 1 + (NITRO_BOOST - 1) * (nitroAmount / NITRO_MAX);
                         carSpeed *= speedBoost;
-                        
+
                         // Limitar velocidad máxima
                         if (carSpeed > MAX_CAR_SPEED) {
                             carSpeed = MAX_CAR_SPEED;
                         }
-                        
+
                         // Efectos visuales
                         nitroBarContainer.classList.add('active');
                         speedEffect.classList.add('active');
-                        
+
                         // Efecto de cámara (ligero zoom y movimiento)
                         camera.fov = THREE.MathUtils.lerp(camera.fov, 72, 0.1);
                         camera.updateProjectionMatrix();
@@ -2508,11 +2639,11 @@ controls.addEventListener('lock', () => {
                         isNitroActive = false;
                         nitroBarContainer.classList.remove('active');
                         speedEffect.classList.remove('active');
-                        
+
                         // Restaurar FOV normal
                         camera.fov = THREE.MathUtils.lerp(camera.fov, 75, 0.1);
                         camera.updateProjectionMatrix();
-                        
+
                         // Recargar nitro si no está activo
                         if (nitroAmount < NITRO_MAX) {
                             nitroAmount = Math.min(NITRO_MAX, nitroAmount + NITRO_RECHARGE_RATE * frameDelta * 60);
@@ -2526,7 +2657,7 @@ controls.addEventListener('lock', () => {
                     // Fricción normal (más fricción cuando se usa nitro para control)
                     const friction = isNitroActive ? 0.92 : 0.95;
                     carSpeed *= friction;
-                    
+
                     // Límite de velocidad adicional (seguridad)
                     if (Math.abs(carSpeed) > MAX_CAR_SPEED) {
                         carSpeed = Math.sign(carSpeed) * MAX_CAR_SPEED;
@@ -2566,7 +2697,7 @@ controls.addEventListener('lock', () => {
                     document.getElementById('speedEffect').classList.remove('active');
                 }
             }
-            
+
             // Ocultar barra de nitro cuando estás en modo jugador (si no estás en auto)
             if (isPlayerMode) {
                 document.getElementById('nitroBarContainer').style.display = 'none';
@@ -2580,7 +2711,7 @@ controls.addEventListener('lock', () => {
                     hasActiveAudio = true;
                 }
             });
-            
+
             if (hasActiveAudio) {
                 updateAudioVolume();
                 updateCarBounce();
@@ -2597,8 +2728,16 @@ controls.addEventListener('lock', () => {
                 updateLODAndVisibility();
             }
 
-            // Actualizar posición en multiplayer
-            updateMyPosition();
+            // Actualizar visualización de coordenadas si el menú está abierto
+            if (isMusicMenuOpen) {
+                let p;
+                if (isPlayerMode) p = controls.getObject().position;
+                else if (activeCarContainer) p = activeCarContainer.position;
+
+                if (p) {
+                    document.getElementById('coordsDisplay').innerText = `📍 X: ${p.x.toFixed(2)} | Y: ${p.y.toFixed(2)} | Z: ${p.z.toFixed(2)}`;
+                }
+            }
 
             renderer.render(scene, camera);
         }
@@ -2619,20 +2758,20 @@ controls.addEventListener('lock', () => {
             Object.values(loadedCars).forEach(carData => {
                 if (carData.container && carData.container.userData.meshes) {
                     const distance = playerPos.distanceTo(carData.container.position);
-                    
+
                     // Si está muy lejos, ocultar completamente
                     if (distance > VISIBILITY_DISTANCE) {
                         carData.container.visible = false;
                         return;
                     }
-                    
+
                     carData.container.visible = true;
-                    
+
                     // Aplicar LOD basado en distancia
                     const meshes = carData.container.userData.meshes;
                     meshes.forEach((mesh, index) => {
                         if (!mesh.material) return;
-                        
+
                         // Mantener sombras activas siempre (solo desactivar si está muy muy lejos)
                         // Las sombras son importantes visualmente, así que las mantenemos activas
                         if (distance > VISIBILITY_DISTANCE * 1.5) {
@@ -2644,7 +2783,7 @@ controls.addEventListener('lock', () => {
                             mesh.castShadow = true;
                             mesh.receiveShadow = true;
                         }
-                        
+
                         // Reducir calidad de geometría a distancia (simplificar materiales) pero mantener sombras
                         if (distance > LOD_DISTANCE_FAR) {
                             // Muy lejos: mantener sombras pero simplificar material
@@ -2661,6 +2800,27 @@ controls.addEventListener('lock', () => {
                             }
                         }
                     });
+                }
+            });
+
+            // Actualizar LOD de decoraciones
+            Object.values(loadedDecorations).forEach(dec => {
+                if (dec.container) {
+                    const distance = playerPos.distanceTo(dec.container.position);
+
+                    // Visibilidad simple por distancia para objetos grandes
+                    if (distance > VISIBILITY_DISTANCE * 2) {
+                        dec.container.visible = false;
+                        return;
+                    }
+                    dec.container.visible = true;
+
+                    // Sombras dinámicas según distancia
+                    if (dec.meshes) {
+                        dec.meshes.forEach(mesh => {
+                            mesh.castShadow = (distance < VISIBILITY_DISTANCE);
+                        });
+                    }
                 }
             });
 
