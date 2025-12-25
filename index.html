@@ -713,13 +713,32 @@
                 hasCollision: true
             },
             {
-                id: 'ejemplo_edificio1',
+                id: 'ejemplo_edificio2',
+                name: 'Edificio de Prueba',
+                modelUrl: 'https://raw.githubusercontent.com/chipeosimulator/Modelos/main/Sillaplastica.glb', // Usando link de auto como ejemplo
+                position: { x: -2.73, y: 0.3, z: 17.16 },
+                rotation: { x: 0, y: 0, z: 0 },
+                scale: 1.5,
+                hasCollision: true
+            },
+            {
+                id: 'ejemplo_edificio3',
                 name: 'Edificio de Prueba',
                 modelUrl: 'https://raw.githubusercontent.com/chipeosimulator/Modelos/main/colmados.glb', // Usando link de auto como ejemplo
                 position: { x: -6.79, y: 2.5, z: 14.25 },
                 rotation: { x: 0, y: 0, z: 0 },
                 scale: 8,
                 hasCollision: false
+            },
+            {
+                id: 'bocina1',
+                name: 'Bocina de Chipeo',
+                modelUrl: 'https://raw.githubusercontent.com/chipeosimulator/Modelos/main/Bocina.glb',
+                position: { x: -3.63, y: 0.5, z: 15.16 },
+                rotation: { x: 0, y: 0, z: 0 },
+                scale: 2.0,
+                hasCollision: true,
+                radio: true // Sistema simplificado: solo falta esta variable
             }
             // {
             //     id: 'silla1',
@@ -765,18 +784,15 @@
         scene.fog = new THREE.Fog(0x87ceeb, 150, 400);
 
         const renderer = new THREE.WebGLRenderer({
-            antialias: true,
-            powerPreference: "high-performance", // Optimizar para rendimiento
-            stencil: false, // Desactivar stencil si no se usa
+            antialias: window.devicePixelRatio < 2,
+            powerPreference: "high-performance",
+            stencil: false,
             depth: true
         });
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.shadowMap.enabled = true;
-        renderer.shadowMap.type = THREE.PCFSoftShadowMap; // Mejor calidad de sombras
-        renderer.shadowMap.autoUpdate = true;
-        renderer.frustumCulled = true; // Habilitar frustum culling automático
-        renderer.sortObjects = false; // Optimización: desactivar sorting innecesario
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5)); // Limitar pixel ratio para mejor rendimiento
+        renderer.shadowMap.type = THREE.BasicShadowMap; // Máximo rendimiento por defecto
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.2));
         document.body.appendChild(renderer.domElement);
 
         // 2. CÁMARA
@@ -978,114 +994,62 @@
             scene.add(line);
         }
 
-        // Árboles (con optimización de distancia)
-        const trees = [];
-        function createTree(x, z) {
-            const tree = new THREE.Group();
+        // VEGETACIÓN OPTIMIZADA (INSTANCED MESH)
+        // Esto permite dibujar miles de árboles/flores con un solo dibujo (Draw Call)
+        const treeCount = 60;
+        const trunkGeo = new THREE.CylinderGeometry(0.3, 0.4, 3, 8);
+        const trunkMat = new THREE.MeshStandardMaterial({ color: 0x6b4423, roughness: 0.9 });
+        const foliageGeo = new THREE.SphereGeometry(2, 8, 8);
+        const foliageMat = new THREE.MeshStandardMaterial({ color: 0x3a7d3a, roughness: 0.8 });
 
-            const trunkGeo = new THREE.CylinderGeometry(0.3, 0.4, 3, 8);
-            const trunkMat = new THREE.MeshStandardMaterial({
-                color: 0x6b4423,
-                roughness: 0.9
-            });
-            const trunk = new THREE.Mesh(trunkGeo, trunkMat);
-            trunk.position.y = 1.5;
-            trunk.castShadow = true;
-            trunk.frustumCulled = true;
-            tree.add(trunk);
+        const instancedTrunks = new THREE.InstancedMesh(trunkGeo, trunkMat, treeCount);
+        const instancedFoliage = new THREE.InstancedMesh(foliageGeo, foliageMat, treeCount);
+        instancedTrunks.castShadow = true;
+        instancedTrunks.receiveShadow = true;
+        instancedFoliage.castShadow = true;
+        instancedFoliage.receiveShadow = true;
 
-            const foliageGeo = new THREE.SphereGeometry(2, 8, 8);
-            const foliageMat = new THREE.MeshStandardMaterial({
-                color: 0x3a7d3a,
-                roughness: 0.8
-            });
-            const foliage = new THREE.Mesh(foliageGeo, foliageMat);
-            foliage.position.y = 4;
-            foliage.castShadow = true;
-            foliage.frustumCulled = true;
-            tree.add(foliage);
+        const dummy = new THREE.Object3D();
+        let placedTrees = 0;
+        while (placedTrees < treeCount) {
+            const x = (Math.random() - 0.5) * 600;
+            const z = (Math.random() - 0.5) * 1000;
+            if (Math.abs(x) < 25) continue; // Más margen para la carretera
 
-            tree.position.set(x, 0, z);
-            tree.frustumCulled = true;
-            tree.userData.isTree = true;
-            return tree;
+            dummy.position.set(x, 1.5, z);
+            dummy.updateMatrix();
+            instancedTrunks.setMatrixAt(placedTrees, dummy.matrix);
+
+            dummy.position.set(x, 4, z);
+            dummy.updateMatrix();
+            instancedFoliage.setMatrixAt(placedTrees, dummy.matrix);
+            placedTrees++;
         }
+        scene.add(instancedTrunks, instancedFoliage);
 
-        for (let i = 0; i < 30; i++) {
-            const z = (Math.random() - 0.5) * 500;
-            const tree1 = createTree(-30 - Math.random() * 20, z);
-            const tree2 = createTree(30 + Math.random() * 20, z);
-            scene.add(tree1);
-            scene.add(tree2);
-            trees.push(tree1, tree2);
+        // Flores Instanciadas
+        const flowerCount = 100;
+        const flowerGeo = new THREE.SphereGeometry(0.2, 6, 6);
+        const flowerMat = new THREE.MeshStandardMaterial({ color: 0xff5252, roughness: 0.6 });
+        const instancedFlowers = new THREE.InstancedMesh(flowerGeo, flowerMat, flowerCount);
+        instancedFlowers.castShadow = true;
+
+        let placedFlowers = 0;
+        while (placedFlowers < flowerCount) {
+            const x = (Math.random() - 0.5) * 500;
+            const z = (Math.random() - 0.5) * 1000;
+            if (Math.abs(x) < 18) continue; // Margen para la calle
+
+            dummy.position.set(x, 0.2, z);
+            dummy.updateMatrix();
+            instancedFlowers.setMatrixAt(placedFlowers, dummy.matrix);
+
+            // Color aleatorio para cada flor
+            const color = new THREE.Color().setHSL(Math.random(), 0.7, 0.5);
+            instancedFlowers.setColorAt(placedFlowers, color);
+            placedFlowers++;
         }
-
-        // Nubes (con optimización de distancia)
-        const clouds = [];
-        function createCloud(x, y, z) {
-            const cloud = new THREE.Group();
-            const cloudMat = new THREE.MeshStandardMaterial({
-                color: 0xffffff,
-                transparent: true,
-                opacity: 0.8,
-                roughness: 1
-            });
-
-            for (let i = 0; i < 5; i++) {
-                const sphere = new THREE.Mesh(
-                    new THREE.SphereGeometry(3 + Math.random() * 2, 8, 8),
-                    cloudMat
-                );
-                sphere.position.set(
-                    (Math.random() - 0.5) * 8,
-                    (Math.random() - 0.5) * 2,
-                    (Math.random() - 0.5) * 8
-                );
-                sphere.frustumCulled = true;
-                cloud.add(sphere);
-            }
-
-            cloud.position.set(x, y, z);
-            cloud.frustumCulled = true;
-            cloud.userData.isCloud = true;
-            return cloud;
-        }
-
-        for (let i = 0; i < 15; i++) {
-            const cloud = createCloud(
-                (Math.random() - 0.5) * 300,
-                30 + Math.random() * 20,
-                (Math.random() - 0.5) * 300
-            );
-            scene.add(cloud);
-            clouds.push(cloud);
-        }
-
-        // Flores (con optimización de distancia)
-        const flowers = [];
-        function createFlower(x, z) {
-            const colors = [0xff5252, 0xffeb3b, 0x00bcd4, 0xe91e63];
-            const flowerGeo = new THREE.SphereGeometry(0.2, 6, 6);
-            const flowerMat = new THREE.MeshStandardMaterial({
-                color: colors[Math.floor(Math.random() * colors.length)],
-                roughness: 0.6
-            });
-            const flower = new THREE.Mesh(flowerGeo, flowerMat);
-            flower.position.set(x, 0.2, z);
-            flower.frustumCulled = true;
-            flower.userData.isFlower = true;
-            return flower;
-        }
-
-        for (let i = 0; i < 50; i++) {
-            const x = (Math.random() - 0.5) * 200;
-            const z = (Math.random() - 0.5) * 500;
-            if (Math.abs(x) > 15) {
-                const flower = createFlower(x, z);
-                scene.add(flower);
-                flowers.push(flower);
-            }
-        }
+        scene.add(instancedFlowers);
 
         // ========================================
         // 🚗 CARGA DINÁMICA DE AUTOS
@@ -1211,64 +1175,88 @@
             });
         }
 
-        // Función para cargar decoraciones
+        // ===== SISTEMA DE CACHE DE MODELOS =====
+        // Esto evita que el mismo link se descargue varias veces si se usa en distintos objetos
+        const modelCache = {};
+
+        // Función para cargar decoraciones (OPTIMIZADA CON CACHE Y CLONACIÓN)
         function loadDecorationFromConfig(config) {
             return new Promise((resolve, reject) => {
                 const container = new THREE.Group();
                 scene.add(container);
 
-                const loader = new GLTFLoader();
-                loader.load(
-                    config.modelUrl,
-                    (gltf) => {
-                        const model = gltf.scene;
+                const modelUrl = config.modelUrl;
 
-                        // Centrar y posicionar
-                        const box = new THREE.Box3().setFromObject(model);
-                        const center = box.getCenter(new THREE.Vector3());
-                        model.position.x = -center.x;
-                        model.position.z = -center.z;
-                        model.position.y = -box.min.y;
+                // Si el modelo ya se está cargando o ya se cargó, usar el cache
+                if (!modelCache[modelUrl]) {
+                    // Si es la primera vez que se pide este link, crear una promesa de carga
+                    const loader = new GLTFLoader();
+                    modelCache[modelUrl] = new Promise((res, rej) => {
+                        loader.load(modelUrl, (gltf) => res(gltf), undefined, (err) => rej(err));
+                    });
+                }
 
-                        // Aplicar transformaciones
-                        model.rotation.set(config.rotation.x || 0, config.rotation.y || 0, config.rotation.z || 0);
-                        model.scale.set(config.scale, config.scale, config.scale);
+                // Esperar a que el modelo base esté listo y clonarlo
+                modelCache[modelUrl].then((gltf) => {
+                    const model = gltf.scene.clone(); // CLONAR: Muy rápido y ligero
 
-                        // Sombras y Optimización
-                        const meshes = [];
-                        model.traverse(n => {
-                            if (n.isMesh) {
-                                n.castShadow = true;
-                                n.receiveShadow = true;
-                                n.frustumCulled = true;
-                                meshes.push(n);
-                            }
-                        });
+                    // Configurar posición base dentro del contenedor para centrado
+                    const box = new THREE.Box3().setFromObject(model);
+                    const center = box.getCenter(new THREE.Vector3());
+                    model.position.x = -center.x;
+                    model.position.z = -center.z;
+                    model.position.y = -box.min.y;
 
-                        container.add(model);
-                        container.position.set(config.position.x, config.position.y || 0, config.position.z);
+                    // Aplicar transformaciones individuales
+                    model.rotation.set(config.rotation.x || 0, config.rotation.y || 0, config.rotation.z || 0);
+                    model.scale.set(config.scale, config.scale, config.scale);
 
-                        // Guardar referencia para colisiones y LOD
-                        const finalBox = new THREE.Box3().setFromObject(container);
-                        const size = finalBox.getSize(new THREE.Vector3());
+                    // Sombras y Optimización (individual para cada clon)
+                    const meshes = [];
+                    model.traverse(n => {
+                        if (n.isMesh) {
+                            n.castShadow = true;
+                            n.receiveShadow = true;
+                            n.frustumCulled = true;
+                            meshes.push(n);
+                        }
+                    });
 
-                        loadedDecorations[config.id] = {
-                            id: config.id,
-                            container: container,
-                            meshes: meshes,
-                            originalMaterials: meshes.map(m => m.material),
-                            hasCollision: config.hasCollision,
-                            collisionBox: {
-                                width: size.x * 0.9,
-                                length: size.z * 0.9
-                            }
-                        };
+                    container.add(model);
+                    container.position.set(config.position.x, config.position.y || 0, config.position.z);
 
-                        resolve();
-                    },
-                    undefined,
-                    reject
-                );
+                    // Guardar referencia para colisiones y LOD
+                    const finalBox = new THREE.Box3().setFromObject(container);
+                    const size = finalBox.getSize(new THREE.Vector3());
+
+                    loadedDecorations[config.id] = {
+                        id: config.id,
+                        name: config.name, // Faltaba esto
+                        container: container,
+                        meshes: meshes,
+                        originalMaterials: meshes.map(m => m.material),
+                        hasCollision: config.hasCollision,
+                        radio: config.radio,
+                        baseY: config.position.y || 0,
+                        // Inicializar audio dinámicamente si es una radio
+                        audio: config.radio ? {
+                            analyser: null,
+                            dataArray: null,
+                            audioSource: null,
+                            audioElement: new Audio(),
+                            maxVolume: 1.0,
+                            isPlaying: false,
+                            bassSensitivity: 0.8,
+                            bounce: 0
+                        } : null,
+                        collisionBox: {
+                            width: size.x * 0.9,
+                            length: size.z * 0.9
+                        }
+                    };
+
+                    resolve();
+                }).catch(reject);
             });
         }
 
@@ -1459,14 +1447,56 @@
                         loadingInProgress[config.id] = false;
                     }
                 });
+            });
 
-                // Crear listener para ocupantes de este auto
-                const occupantsRef = ref(database, `carGame/${config.id}Occupants`);
-                onValue(occupantsRef, (snapshot) => {
-                    const occupants = snapshot.val();
-                    // Solo log en cambios
-                    if (occupants && Object.keys(occupants).length > 0) {
-                        // Silencioso - no spamear consola
+            // Registrar listeners para decoraciones tipo RADIO
+            decorationsConfig.forEach(config => {
+                if (!config.radio) return;
+                const musicRef = ref(database, `carGame/${config.id}Music`);
+                onValue(musicRef, async (snapshot) => {
+                    const musicData = snapshot.val();
+                    const dec = loadedDecorations[config.id];
+                    if (!dec || !dec.audio) return;
+
+                    if (!musicData) {
+                        dec.audio.audioElement.pause();
+                        dec.audio.isPlaying = false;
+                        return;
+                    }
+
+                    // Guardar estado de música por decoración (para rellenar menú luego)
+                    carMusicState[config.id] = musicData;
+
+                    // Si YO puse esta música, no recargarla
+                    if (musicData.playerId === currentPlayerId) return;
+
+                    // Si ya está cargando, esperar
+                    if (loadingInProgress[config.id]) return;
+
+                    // Si ya está cargada esta misma URL, no recargarla
+                    if (loadedMusicURLs[config.id] === musicData.url) {
+                        if (dec.audio.audioElement && !dec.audio.audioElement.paused) return;
+                    }
+
+                    // Debounce
+                    const now = Date.now();
+                    if (lastLoadTime[config.id] && (now - lastLoadTime[config.id]) < 2000) return;
+
+                    loadingInProgress[config.id] = true;
+                    lastLoadTime[config.id] = now;
+
+                    try {
+                        console.log(`🎵 Sincronizando música en bocina: ${config.name}`);
+                        dec.audio.maxVolume = musicData.volume || 1.0;
+                        dec.audio.bassSensitivity = musicData.bassSensitivity || 0.8;
+                        await loadAudioFromURL(musicData.url, config.id);
+                        playAudio(config.id);
+
+                        loadedMusicURLs[config.id] = musicData.url;
+                    } catch (error) {
+                        console.error(`❌ Error en bocina ${config.name}:`, error);
+                    } finally {
+                        loadingInProgress[config.id] = false;
                     }
                 });
             });
@@ -1731,8 +1761,10 @@
                 console.log(`🎵 Configurando audio para ${carId}...`);
 
                 // Buscar el objeto de audio correcto
-                const audioObj = loadedCars[carId] ? loadedCars[carId].audio :
-                    (carId === 'car2' ? car2Audio : car1Audio);
+                let audioObj;
+                if (loadedCars[carId]) audioObj = loadedCars[carId].audio;
+                else if (loadedDecorations[carId]) audioObj = loadedDecorations[carId].audio;
+                else audioObj = (carId === 'car2' ? car2Audio : car1Audio);
 
                 if (!audioObj || !audioObj.audioElement) {
                     console.error(`No hay elemento de audio para ${carId}`);
@@ -1784,6 +1816,8 @@
             let audioObj;
             if (loadedCars[carId]) {
                 audioObj = loadedCars[carId].audio;
+            } else if (loadedDecorations[carId]) {
+                audioObj = loadedDecorations[carId].audio;
             } else if (carId === 'car2') {
                 audioObj = car2Audio;
             } else {
@@ -1816,6 +1850,8 @@
             let audioObj;
             if (loadedCars[carId] && loadedCars[carId].audio) {
                 audioObj = loadedCars[carId].audio;
+            } else if (loadedDecorations[carId] && loadedDecorations[carId].audio) {
+                audioObj = loadedDecorations[carId].audio;
             } else if (carId === 'car2') {
                 audioObj = car2Audio;
             } else if (carId === 'car3') {
@@ -1826,21 +1862,19 @@
 
             if (!audioObj || !audioObj.isPlaying) return 0;
 
-            // Generar una onda senoidal suave basada en el tiempo para simular el "bass"
-            const now = performance.now() / 200; // velocidad del pulso
+            // Emular un pulso de bajo rápido (estilo dembow/chipeo)
+            const bpm = 128;
+            const bps = bpm / 60;
+            const now = performance.now() / 1000;
 
-            // Fase aleatoria por auto para que no se muevan todos igual
-            if (audioObj._bassPhase === undefined) {
-                audioObj._bassPhase = Math.random() * Math.PI * 2;
-            }
+            // Pulso principal (beat)
+            let pulse = Math.pow(Math.max(0, Math.sin(now * Math.PI * bps * 2)), 4);
 
-            const baseWave = (Math.sin(now + audioObj._bassPhase) + 1) / 2; // 0..1
-            const jitter = (Math.random() - 0.5) * 0.2; // pequeña variación aleatoria
+            // Añadir un poco de ruido/jitter para realismo
+            const noise = (Math.random() - 0.5) * 0.1;
 
-            let level = baseWave + jitter;
-            if (level < 0) level = 0;
-            if (level > 1) level = 1;
-            return level;
+            let level = pulse + noise;
+            return Math.min(1, Math.max(0, level));
         }
 
         // Sistema de música
@@ -1861,8 +1895,9 @@
             const newVolume = e.target.value / 100;
             volumeValue.textContent = e.target.value;
 
-            if (currentAudioTarget && loadedCars[currentAudioTarget]) {
-                const audioObj = loadedCars[currentAudioTarget].audio;
+            const target = loadedCars[currentAudioTarget] || loadedDecorations[currentAudioTarget];
+            if (currentAudioTarget && target) {
+                const audioObj = target.audio;
                 audioObj.maxVolume = newVolume;
                 if (audioObj.audioElement) {
                     audioObj.audioElement.volume = newVolume;
@@ -1874,8 +1909,9 @@
             const newSensitivity = e.target.value / 100;
             bassValue.textContent = e.target.value;
 
-            if (currentAudioTarget && loadedCars[currentAudioTarget]) {
-                const audioObj = loadedCars[currentAudioTarget].audio;
+            const target = loadedCars[currentAudioTarget] || loadedDecorations[currentAudioTarget];
+            if (currentAudioTarget && target) {
+                const audioObj = target.audio;
                 audioObj.bassSensitivity = newSensitivity;
             }
         });
@@ -1898,7 +1934,7 @@
                 playBtn.disabled = true;
                 playBtn.textContent = '⏳ Cargando...';
 
-                const audioObj = loadedCars[currentAudioTarget].audio;
+                const audioObj = (loadedCars[currentAudioTarget] || loadedDecorations[currentAudioTarget]).audio;
 
                 //Detener cualquier reproducción anterior EN ESTE AUTO
                 if (audioObj.audioSource) {
@@ -1945,6 +1981,8 @@
             let audioObj;
             if (loadedCars[currentAudioTarget]) {
                 audioObj = loadedCars[currentAudioTarget].audio;
+            } else if (loadedDecorations[currentAudioTarget]) {
+                audioObj = loadedDecorations[currentAudioTarget].audio;
             } else if (currentAudioTarget === 'car2') {
                 audioObj = car2Audio;
             } else {
@@ -2038,6 +2076,26 @@
                     }
                 }
             });
+
+            Object.values(loadedDecorations).forEach(dec => {
+                if (dec.radio && dec.audio && dec.audio.audioElement && dec.container) {
+                    const dx = playerPos.x - dec.container.position.x;
+                    const dy = playerPos.y - dec.container.position.y;
+                    const dz = playerPos.z - dec.container.position.z;
+                    const distSq = dx * dx + dy * dy + dz * dz;
+                    const dist = Math.sqrt(distSq);
+
+                    let volumeFactor = 0;
+                    if (dist <= minDistance) volumeFactor = 1;
+                    else if (dist >= maxDistance) volumeFactor = 0;
+                    else volumeFactor = 1 - (dist - minDistance) / distanceRange;
+
+                    const newVolume = dec.audio.maxVolume * volumeFactor;
+                    if (Math.abs(dec.audio.audioElement.volume - newVolume) > 0.01) {
+                        dec.audio.audioElement.volume = newVolume;
+                    }
+                }
+            });
         }
 
         // Función para hacer rebotar los autos con el bass - TODOS LOS AUTOS DINÁMICAMENTE
@@ -2095,10 +2153,103 @@
                 }
             });
 
+            // Rebote para DECORACIONES tipo radio (Bocina)
+            Object.values(loadedDecorations).forEach(dec => {
+                if (dec.radio && dec.container && dec.audio) {
+                    const bassLevel = getBassLevel(dec.id);
+                    if (bassLevel <= 0) {
+                        dec.audio.bounce = (dec.audio.bounce || 0) * 0.9;
+                        dec.container.position.y = dec.baseY + dec.audio.bounce;
+                        dec.container.rotation.x *= 0.9;
+                        dec.container.rotation.z *= 0.9;
+                        return;
+                    }
+                    const sensitivity = dec.audio.bassSensitivity || 0.8;
+                    const targetBounce = bassLevel * sensitivity * 3.5; // Aumentado significativamente
+                    dec.audio.bounce = (dec.audio.bounce || 0) + (targetBounce - (dec.audio.bounce || 0)) * 0.45;
+                    dec.container.position.y = dec.baseY + dec.audio.bounce;
+
+                    if (dec.audio.bounce > 0.5) {
+                        console.log(`🔊 Bocina saltando! Y: ${dec.container.position.y.toFixed(2)}`);
+                    }
+
+                    // Vibración agresiva si hay mucho bass
+                    if (bassLevel > 0.5) {
+                        dec.container.rotation.x = (Math.random() - 0.5) * 0.04 * bassLevel;
+                        dec.container.rotation.z = (Math.random() - 0.5) * 0.04 * bassLevel;
+                    }
+                }
+            });
+
             // Actualizar UI solo si estamos viendo el menú de música
-            if (currentAudioTarget && loadedCars[currentAudioTarget]) {
+            if (currentAudioTarget && (loadedCars[currentAudioTarget] || loadedDecorations[currentAudioTarget])) {
                 const bassLevel = getBassLevel(currentAudioTarget);
                 bassLevelSpan.textContent = Math.floor(bassLevel * 100);
+            }
+        }
+
+        // Función para manejar la visibilidad y posición del Radiobox
+        async function updateRadioBoxes() {
+            const radioBoxUrl = 'https://raw.githubusercontent.com/chipeosimulator/Modelos/main/Radiobox.glb';
+
+            for (const [carId, carData] of Object.entries(loadedCars)) {
+                if (!carData.audio) continue;
+
+                // REGLA: Mostrar si hay música Y el auto está vacío (nadie dentro)
+                const isOccupied = (!isPlayerMode && currentCarId === carId) ||
+                    Object.values(otherPlayers).some(p => p.data && p.data.mode === 'car' && p.data.carId === carId);
+
+                const shouldShow = carData.audio.isPlaying && !isOccupied;
+
+                if (shouldShow) {
+                    if (!carData.radioBox && !carData._isLoading) {
+                        carData._isLoading = true;
+                        try {
+                            if (!modelCache[radioBoxUrl]) {
+                                const loader = new GLTFLoader();
+                                modelCache[radioBoxUrl] = new Promise((res, rej) => {
+                                    loader.load(radioBoxUrl, (g) => res(g), undefined, (e) => rej(e));
+                                });
+                            }
+
+                            const gltf = await modelCache[radioBoxUrl];
+                            const rb = gltf.scene.clone();
+                            rb.scale.set(2.5, 2.5, 2.5);
+                            scene.add(rb);
+                            carData.radioBox = rb;
+
+                            rb.traverse(n => {
+                                if (n.isMesh) {
+                                    n.castShadow = true;
+                                    n.receiveShadow = true;
+                                }
+                            });
+                            carData._isLoading = false;
+                        } catch (e) {
+                            console.error("Error Radiobox:", e);
+                            carData._isLoading = false;
+                            continue;
+                        }
+                    }
+
+                    if (carData.radioBox) {
+                        const car = carData.container;
+                        const rot = car.rotation.y;
+                        const dist = 7.5; // Distancia aumentada
+
+                        carData.radioBox.position.set(
+                            car.position.x + Math.sin(rot) * dist,
+                            1.3, // Altura elevada
+                            car.position.z + Math.cos(rot) * dist
+                        );
+                        carData.radioBox.rotation.y = rot - Math.PI / 2;
+                        carData.radioBox.visible = true;
+                    }
+                } else {
+                    if (carData.radioBox) {
+                        carData.radioBox.visible = false;
+                    }
+                }
             }
         }
 
@@ -2194,26 +2345,28 @@
                 if (!isPlayerMode && currentCarId && loadedCars[currentCarId] && loadedCars[currentCarId].container) {
                     targetCar = loadedCars[currentCarId];
                 } else {
-                    // Modo jugador: detectar auto más cercano para abrir su menú de música
                     const playerPos = controls.getObject().position;
+                    let closestObj = null;
+                    let closestDist = Infinity;
 
-                    let closestCar = null;
-                    let closestDistance = Infinity;
-
-                    // Buscar en todos los autos cargados
-                    Object.values(loadedCars).forEach(carData => {
-                        if (carData.container) {
-                            const distance = playerPos.distanceTo(carData.container.position);
-                            if (distance < closestDistance) {
-                                closestDistance = distance;
-                                closestCar = carData;
-                            }
+                    // Buscar en autos
+                    Object.values(loadedCars).forEach(car => {
+                        if (car.container) {
+                            const d = playerPos.distanceTo(car.container.position);
+                            if (d < closestDist) { closestDist = d; closestObj = car; }
                         }
                     });
 
-                    // Solo permitir menú si estás cerca de un auto (dentro de 10 unidades)
-                    if (closestCar && closestDistance < 10) {
-                        targetCar = closestCar;
+                    // Buscar en decoraciones tipo RADIO
+                    Object.values(loadedDecorations).forEach(dec => {
+                        if (dec.radio && dec.container) {
+                            const d = playerPos.distanceTo(dec.container.position);
+                            if (d < closestDist) { closestDist = d; closestObj = dec; }
+                        }
+                    });
+
+                    if (closestObj && closestDist < 10) {
+                        targetCar = closestObj;
                     }
                 }
 
@@ -2225,8 +2378,9 @@
                 currentAudioTarget = targetCar.id;
                 document.querySelector('#musicMenu h2').textContent = `🎵 Radio ${targetCar.name} - Bass Boost 🎵`;
 
-                // Obtener valores actuales del auto (prioridad: valores actuales > estado guardado > valores por defecto)
-                const audioObj = loadedCars[currentAudioTarget] ? loadedCars[currentAudioTarget].audio : null;
+                // Obtener valores actuales del objetivo (prioridad: valores actuales > estado guardado > valores por defecto)
+                const target = loadedCars[currentAudioTarget] || loadedDecorations[currentAudioTarget];
+                const audioObj = target ? target.audio : null;
                 const state = carMusicState[currentAudioTarget];
 
                 // Obtener volumen: primero del objeto de audio actual, luego del estado, luego default
@@ -2412,6 +2566,7 @@
             if (e.key === 'Shift') {
                 shiftKeyPressed = false;
                 isNitroActive = false;
+                nitroExhausted = false; // Al soltar Shift, se quita el bloqueo
             }
         });
 
@@ -2419,14 +2574,15 @@
         let carRotation = 0;
 
         // Sistema de Nitro
-        let nitroAmount = 200; // Nitro inicial (0-200)
-        const NITRO_MAX = 200; // Aumentado para más nitro
-        const NITRO_CONSUMPTION_RATE = 1.5; // Porcentaje consumido por frame (reducido)
-        const NITRO_RECHARGE_RATE = 1.2; // Porcentaje recargado por frame (aumentado)
-        const NITRO_BOOST = 1.4; // Multiplicador de velocidad (reducido para evitar salirse del mapa)
-        const MAX_CAR_SPEED = 0.8; // Velocidad máxima del auto (con nitro)
+        let nitroAmount = 300; // Nitro inicial (0-300)
+        const NITRO_MAX = 300; // Aumentado para más duración
+        const NITRO_CONSUMPTION_RATE = 1.8; // Ajustado para balance
+        const NITRO_RECHARGE_RATE = 1.0; // Recarga un poco más lenta
+        const NITRO_BOOST = 1.5; // Multiplicador de velocidad
+        const MAX_CAR_SPEED = 1.2; // Velocidad máxima del auto aumentada (antes 0.8)
         let isNitroActive = false;
         let shiftKeyPressed = false;
+        let nitroExhausted = false; // Bloqueo cuando se acaba el nitro
 
         let frameDelta = 1 / 60;
         let lastFrameTime = performance.now();
@@ -2601,10 +2757,10 @@
             } else {
                 if (activeCarContainer && carRole === 'driver') {
                     // Solo el conductor puede controlar el auto
-                    if (moveForward.active) carSpeed += 0.01;
-                    if (moveBackward.active) carSpeed -= 0.01;
-                    if (moveLeft.active) carRotation += 0.03;
-                    if (moveRight.active) carRotation -= 0.03;
+                    if (moveForward.active) carSpeed += 0.015; // Aceleración aumentada (antes 0.01)
+                    if (moveBackward.active) carSpeed -= 0.015;
+                    if (moveLeft.active) carRotation += 0.035; // Giro un poco más ágil
+                    if (moveRight.active) carRotation -= 0.035;
 
                     // Sistema de Nitro
                     const nitroBarContainer = document.getElementById('nitroBarContainer');
@@ -2614,10 +2770,18 @@
                     // Mostrar barra de nitro cuando estás manejando
                     nitroBarContainer.style.display = 'block';
 
-                    // Activar nitro si Shift está presionado y hay nitro disponible
-                    if (shiftKeyPressed && nitroAmount > 0 && moveForward.active) {
+                    // Sistema de Nitro con bloqueo (hay que soltar Shift si se acaba)
+                    const canActivateNitro = !nitroExhausted && (nitroAmount > 10 || (isNitroActive && nitroAmount > 0));
+
+                    if (shiftKeyPressed && canActivateNitro && moveForward.active) {
                         isNitroActive = true;
                         nitroAmount = Math.max(0, nitroAmount - NITRO_CONSUMPTION_RATE * frameDelta * 60);
+
+                        // Si llega a 0, activar bloqueo de agotamiento
+                        if (nitroAmount <= 0) {
+                            isNitroActive = false;
+                            nitroExhausted = true;
+                        }
 
                         // Aplicar boost de velocidad (limitado)
                         const speedBoost = 1 + (NITRO_BOOST - 1) * (nitroAmount / NITRO_MAX);
@@ -2654,8 +2818,8 @@
                     // Actualizar barra de nitro (convertir de 0-200 a 0-100%)
                     nitroBar.style.width = `${(nitroAmount / NITRO_MAX) * 100}%`;
 
-                    // Fricción normal (más fricción cuando se usa nitro para control)
-                    const friction = isNitroActive ? 0.92 : 0.95;
+                    // Fricción normal (ajustada para que no pierda tanta velocidad)
+                    const friction = isNitroActive ? 0.94 : 0.965; // Menos fricción = más velocidad final
                     carSpeed *= friction;
 
                     // Límite de velocidad adicional (seguridad)
@@ -2707,15 +2871,19 @@
             // Actualizar efectos de audio (optimizado: solo si hay audio activo)
             let hasActiveAudio = false;
             Object.values(loadedCars).forEach(carData => {
-                if (carData.audio && carData.audio.isPlaying) {
-                    hasActiveAudio = true;
-                }
+                if (carData.audio && carData.audio.isPlaying) hasActiveAudio = true;
+            });
+            Object.values(loadedDecorations).forEach(dec => {
+                if (dec.radio && dec.audio && dec.audio.isPlaying) hasActiveAudio = true;
             });
 
             if (hasActiveAudio) {
                 updateAudioVolume();
                 updateCarBounce();
             }
+
+            // --- Lógica de Radiobox ---
+            updateRadioBoxes();
 
             // Interpolar posiciones de otros jugadores para movimiento suave
             if (Object.keys(otherPlayers).length > 0) {
@@ -2738,6 +2906,9 @@
                     document.getElementById('coordsDisplay').innerText = `📍 X: ${p.x.toFixed(2)} | Y: ${p.y.toFixed(2)} | Z: ${p.z.toFixed(2)}`;
                 }
             }
+
+            // --- Sincronización Multiplayer ---
+            updateMyPosition();
 
             renderer.render(scene, camera);
         }
@@ -2822,46 +2993,6 @@
                         });
                     }
                 }
-            });
-
-            // Actualizar visibilidad de árboles
-            trees.forEach(tree => {
-                const distance = playerPos.distanceTo(tree.position);
-                if (distance > VISIBILITY_DISTANCE) {
-                    tree.visible = false;
-                } else {
-                    tree.visible = true;
-                    // Mantener sombras activas (solo desactivar si está muy lejos)
-                    tree.traverse(child => {
-                        if (child.isMesh) {
-                            child.castShadow = distance < VISIBILITY_DISTANCE * 1.2;
-                        }
-                    });
-                }
-            });
-
-            // Actualizar visibilidad de flores
-            flowers.forEach(flower => {
-                const distance = playerPos.distanceTo(flower.position);
-                if (distance > VISIBILITY_DISTANCE * 0.7) { // Flores desaparecen antes
-                    flower.visible = false;
-                } else {
-                    flower.visible = true;
-                    // Mantener sombras activas para flores también
-                    flower.castShadow = distance < VISIBILITY_DISTANCE;
-                }
-            });
-
-            // Actualizar visibilidad de nubes (siempre visibles pero sin sombras a distancia)
-            clouds.forEach(cloud => {
-                const distance = playerPos.distanceTo(cloud.position);
-                cloud.visible = distance < VISIBILITY_DISTANCE * 2; // Nubes se ven desde más lejos
-                cloud.traverse(child => {
-                    if (child.isMesh) {
-                        // Mantener sombras de nubes activas también
-                        child.castShadow = distance < VISIBILITY_DISTANCE * 1.5;
-                    }
-                });
             });
         }
 
