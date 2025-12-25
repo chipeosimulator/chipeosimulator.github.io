@@ -462,7 +462,7 @@
 
     <!-- Login Menu -->
     <div id="loginMenu">
-        <h2>🚗 Car Game Online 🌐</h2>
+        <h2>🚗 Chipeo Simulator 🌐</h2>
         <p style="color: #aaa; text-align: center;">Ingresa tu nombre para jugar online</p>
         <input type="text" id="playerName" placeholder="Tu nombre" maxlength="20">
         <div style="text-align: center; margin-top: 15px;">
@@ -928,11 +928,13 @@
         sun.shadow.radius = 4; // Suavizar bordes de sombras
         scene.add(sun);
 
-        // Luces adicionales para calidad alta (inicialmente no agregadas)
+        // Variables de configuración Gráfica (Globales)
+        let LOD_DISTANCE_NEAR = 30;
+        let LOD_DISTANCE_MID = 60;
+        let LOD_DISTANCE_FAR = 100;
+        let VISIBILITY_DISTANCE = 150;
         let fillLights = [];
-
-        // Variable para calidad gráfica actual
-        let currentGraphicsQuality = 'normal'; // 'low', 'normal', 'high'
+        let currentGraphicsQuality = 'normal';
 
         // Función para aplicar calidad gráfica
         function applyGraphicsQuality(quality) {
@@ -951,15 +953,13 @@
                 LOD_DISTANCE_FAR = 40;
                 VISIBILITY_DISTANCE = 70;
 
-                // Reducir calidad de sombras al mínimo
-                sun.shadow.mapSize.width = 512;
-                sun.shadow.mapSize.height = 512;
-                sun.shadow.camera.far = 100;
-                ambientLight.intensity = 0.9;
+                // DESACTIVAR SOMBRAS PARA BAJO RENDIMIENTO
+                sun.castShadow = false;
+                ambientLight.intensity = 1.0; // Compensar falta de sol con más luz ambiente
 
                 // Sol en posición normal
                 sun.position.set(50, 50, 50);
-                sun.intensity = 0.8;
+                sun.intensity = 0.5;
 
             } else if (quality === 'normal') {
                 // NORMAL: Configuración estándar
@@ -968,10 +968,12 @@
                 LOD_DISTANCE_FAR = 100;
                 VISIBILITY_DISTANCE = 150;
 
-                // Calidad de sombras estándar
-                sun.shadow.mapSize.width = 2048;
-                sun.shadow.mapSize.height = 2048;
-                sun.shadow.camera.far = 200;
+                // ACTIVAR SOMBRAS ESTÁNDAR
+                sun.castShadow = true;
+                sun.shadow.mapSize.width = 1024; // Calidad media de sombras
+                sun.shadow.mapSize.height = 1024;
+                sun.shadow.camera.far = 150;
+                sun.shadow.bias = -0.0001;
                 ambientLight.intensity = 0.8;
 
                 // Sol en posición normal
@@ -1025,13 +1027,26 @@
             // Actualizar sombras
             sun.shadow.camera.updateProjectionMatrix();
 
-            // Actualizar UI del menú
-            document.querySelectorAll('.quality-option').forEach(option => {
-                option.classList.remove('selected');
-                if (option.dataset.quality === quality) {
-                    option.classList.add('selected');
+            // Guardar en LocalStorage
+            localStorage.setItem('graphicsQuality', quality);
+
+            // Actualizar selector visual en el menú
+            document.querySelectorAll('.quality-option').forEach(opt => {
+                if (opt.dataset.quality === quality) {
+                    opt.classList.add('selected');
+                } else {
+                    opt.classList.remove('selected');
                 }
             });
+        }
+
+        // Cargar calidad guardada al iniciar
+        const savedQuality = localStorage.getItem('graphicsQuality');
+        if (savedQuality) {
+            applyGraphicsQuality(savedQuality);
+        } else {
+            // Default si no hay nada guardado
+            applyGraphicsQuality('normal');
         }
 
         // Event listeners para el menú de configuración gráfica
@@ -3116,10 +3131,7 @@
         // Variables para LOD y visibilidad
         let lastLODUpdate = 0;
         const LOD_UPDATE_INTERVAL = 100; // Actualizar LOD cada 100ms
-        let LOD_DISTANCE_NEAR = 30; // Distancia cercana (calidad máxima)
-        let LOD_DISTANCE_MID = 60; // Distancia media (calidad media)
-        let LOD_DISTANCE_FAR = 100; // Distancia lejana (calidad baja)
-        let VISIBILITY_DISTANCE = 150; // Distancia máxima de visibilidad
+        // Las distancias LOD se definen globalmente arriba para que applyGraphicsQuality funcione
 
         // 8. LOOP DE ANIMACIÓN
         function update() {
