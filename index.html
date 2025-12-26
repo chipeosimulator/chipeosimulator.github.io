@@ -745,7 +745,7 @@
         // 💾 SISTEMA DE CACHÉ PERSISTENTE (IndexedDB)
         // ========================================
         const DB_NAME = 'ChipeoSimulatorCache';
-        const DB_VERSION = 1;
+        const DB_VERSION = 2; // Incrementado para forzar limpieza de caché
         const STORE_NAME = 'models';
 
         let db = null;
@@ -761,9 +761,12 @@
 
                 request.onupgradeneeded = (event) => {
                     const db = event.target.result;
-                    if (!db.objectStoreNames.contains(STORE_NAME)) {
-                        db.createObjectStore(STORE_NAME);
+                    // Si existe una versión vieja, borramos el store para limpiar datos corruptos/viejos
+                    if (db.objectStoreNames.contains(STORE_NAME)) {
+                        db.deleteObjectStore(STORE_NAME);
                     }
+                    db.createObjectStore(STORE_NAME);
+                    console.log("🧹 Caché limpiado y actualizado a versión", DB_VERSION);
                 };
 
                 request.onsuccess = (event) => {
