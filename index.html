@@ -728,7 +728,7 @@
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getDatabase, ref, set, get, update as dbUpdate, onValue, remove, onDisconnect } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
 
-        // ... (Firebase Config)
+        // ... (This content will be generated after I check road coordinates) (Firebase Config)
 
         // Configuración de Draco (Decodificadores súper rápidos)
         const dracoLoader = new DRACOLoader();
@@ -1560,11 +1560,140 @@
         const lineGeo = new THREE.PlaneGeometry(0.5, 10);
         const lineMat = new THREE.MeshBasicMaterial({ color: 0xffdd00 });
 
+        // ... (Líneas amarillas)
         for (let i = -50; i < 50; i++) {
             const line = new THREE.Mesh(lineGeo, lineMat);
             line.rotation.x = -Math.PI / 2;
             line.position.set(0, 0.02, i * 20);
             scene.add(line);
+        }
+
+        // --- POSTES DE LUZ (GEOMETRÍA COMPARTIDA) ---
+        const posteGeo = new THREE.CylinderGeometry(0.15, 0.3, 10, 4);
+        const crucetaGeo = new THREE.BoxGeometry(2.5, 0.1, 0.1);
+        const aislanteGeo = new THREE.CylinderGeometry(0.06, 0.06, 0.2);
+
+        // Curva del brazo (Estática)
+        const armCurve = new THREE.CatmullRomCurve3([
+            new THREE.Vector3(0, 7.5, 0),
+            new THREE.Vector3(1, 7.8, 0),
+            new THREE.Vector3(2.5, 7.5, 0)
+        ]);
+        const brazoGeo = new THREE.TubeGeometry(armCurve, 10, 0.06, 4, false); // Reducido segmentos para optimizar
+
+        const cabezaGeo = new THREE.SphereGeometry(0.25, 8, 8); // Low poly
+        const bombillaGeo = new THREE.SphereGeometry(0.15, 8, 8); // Low poly
+
+        // Materiales compartidos
+        const concreteMat = new THREE.MeshStandardMaterial({ color: 0x888888 });
+        const metalMat = new THREE.MeshStandardMaterial({ color: 0x333333, metalness: 0.8 });
+        const aislanteMat = new THREE.MeshStandardMaterial({ color: 0xeeeeee });
+        const bulbMat = new THREE.MeshBasicMaterial({ color: 0xffffcc }); // Color fijo
+
+        function crearPosteOptimizado(xPos, zPos, rotationY = 0) {
+            const group = new THREE.Group();
+
+            // Cuerpo
+            const p = new THREE.Mesh(posteGeo, concreteMat);
+            p.position.y = 5;
+            p.rotation.y = Math.PI / 4;
+            p.castShadow = true;
+            p.receiveShadow = true;
+            group.add(p);
+
+            // Crucetas
+            [9.2, 8.2].forEach(y => {
+                const arm = new THREE.Mesh(crucetaGeo, metalMat);
+                arm.position.y = y;
+                group.add(arm);
+                [-1, 0, 1].forEach(x => {
+                    const ins = new THREE.Mesh(aislanteGeo, aislanteMat);
+                    ins.position.set(x, y + 0.15, 0);
+                    group.add(ins);
+                });
+            });
+
+            // Brazo lámpara
+            const brazo = new THREE.Mesh(brazoGeo, metalMat);
+            group.add(brazo);
+
+            // Cabeza Cobra
+            const head = new THREE.Mesh(cabezaGeo, concreteMat);
+            head.scale.set(1.5, 0.4, 0.8);
+            head.position.set(2.5, 7.45, 0);
+            group.add(head);
+
+            // Bombilla visual
+            const bulb = new THREE.Mesh(bombillaGeo, bulbMat);
+            bulb.scale.set(1.2, 0.3, 0.8);
+            bulb.position.set(2.5, 7.35, 0);
+            group.add(bulb);
+
+            // 1. Aplicar Rotación
+            group.rotation.y = rotationY;
+            group.position.set(xPos, 0, zPos);
+            scene.add(group);
+
+            // 2. Calcular Puntos Rotados (para cables)
+            const rotatePoint = (x, y, z) => {
+                const vec = new THREE.Vector3(x, y, z);
+                vec.applyAxisAngle(new THREE.Vector3(0, 1, 0), rotationY);
+                vec.add(new THREE.Vector3(xPos, 0, zPos));
+                return vec;
+            };
+
+            const offsetsX = [1, 0, -1];
+            const upperPoints = offsetsX.map(x => rotatePoint(x, 9.45, 0));
+            const lowerPoints = offsetsX.map(x => rotatePoint(x, 8.45, 0));
+
+            return upperPoints.concat(lowerPoints);
+        }
+
+        // CABLES
+        function conectarCables(pA, pB) {
+            // Material de línea simple (más barato que tubos)
+            const cableMat = new THREE.LineBasicMaterial({ color: 0x000000 });
+
+            pA.forEach((start, i) => {
+                const end = pB[i];
+                const mid = new THREE.Vector3((start.x + end.x) / 2, (start.y + end.y) / 2 - 0.5, (start.z + end.z) / 2);
+                const curve = new THREE.QuadraticBezierCurve3(start, mid, end);
+                const points = curve.getPoints(8); // Pocos puntos
+                const geom = new THREE.BufferGeometry().setFromPoints(points);
+                scene.add(new THREE.Line(geom, cableMat));
+            });
+        }
+
+        // GENERAR POSTES A LO LARGO DE LA CARRETERA
+        const postesIzquierda = [];
+        const postesDerecha = []; // Si quisieras poner en ambos lados
+
+        // Lado Izquierdo (X = -12)
+        let ultimoPoste = null;
+        for (let z = -200; z <= 200; z += 60) {
+            const pts = crearPosteOptimizado(-12, z);
+            if (ultimoPoste) {
+                conectarCables(ultimoPoste, pts);
+            }
+            ultimoPoste = pts;
+        }
+
+        // Lado Derecho (X = 12) - Opcional, lo activamos también
+        let ultimoPosteDer = null;
+        for (let z = -200; z <= 200; z += 60) {
+            const pts = crearPosteOptimizado(12, z, Math.PI);
+            // Rotar 180 grados? No, la geometría mira a +X. 
+            // Si está en X=12, debería mirar a -X (hacia la calle).
+            // La función crearPosteOptimizado no rota el grupo.
+            // Para el lado derecho, necesitamos rotarlo. 
+            // Modificaremos la función para aceptar rotación? O rotamos el grupo después.
+            // Pero los cables dependen de la posición global world.
+            // Simplificación: Solo lado izquierdo por ahora para no complicar cables.
+
+            if (ultimoPosteDer) {
+                conectarCables(ultimoPosteDer, pts);
+            }
+            ultimoPosteDer = pts;
         }
 
         // VEGETACIÓN OPTIMIZADA (INSTANCED MESH)
