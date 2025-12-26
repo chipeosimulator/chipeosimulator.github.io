@@ -719,11 +719,20 @@
     <script type="module">
         import * as THREE from 'three';
         import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+        import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js'; // Importar Draco
         import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
 
         // FIREBASE IMPORTS
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getDatabase, ref, set, get, update as dbUpdate, onValue, remove, onDisconnect } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+
+        // ... (Firebase Config)
+
+        // Configuración de Draco (Decodificadores súper rápidos)
+        const dracoLoader = new DRACOLoader();
+        // Usamos los decodificadores oficiales de la versión de Three.js que estamos usando
+        dracoLoader.setDecoderPath('https://unpkg.com/three@0.160.0/examples/jsm/libs/draco/');
+        dracoLoader.preload(); // Pre-argar para que esté listo cuanto antes
 
         // Firebase Configuration
         const firebaseConfig = {
@@ -745,7 +754,7 @@
         // 💾 SISTEMA DE CACHÉ PERSISTENTE (IndexedDB)
         // ========================================
         const DB_NAME = 'ChipeoSimulatorCache';
-        const DB_VERSION = 2; // Incrementado para forzar limpieza de caché
+        const DB_VERSION = 1; // Revertido como solicitado
         const STORE_NAME = 'models';
 
         let db = null;
@@ -761,12 +770,9 @@
 
                 request.onupgradeneeded = (event) => {
                     const db = event.target.result;
-                    // Si existe una versión vieja, borramos el store para limpiar datos corruptos/viejos
-                    if (db.objectStoreNames.contains(STORE_NAME)) {
-                        db.deleteObjectStore(STORE_NAME);
+                    if (!db.objectStoreNames.contains(STORE_NAME)) {
+                        db.createObjectStore(STORE_NAME);
                     }
-                    db.createObjectStore(STORE_NAME);
-                    console.log("🧹 Caché limpiado y actualizado a versión", DB_VERSION);
                 };
 
                 request.onsuccess = (event) => {
@@ -813,6 +819,8 @@
             // Crear promesa de carga para evitar peticiones duplicadas simultáneas
             const loadPromise = new Promise(async (resolve, reject) => {
                 const loader = new GLTFLoader();
+                loader.setDRACOLoader(dracoLoader); // ACTIVAR DRACO PARA ESTE LOADER
+
 
                 // 2. Verificar IndexedDB (ArrayBuffer)
                 try {
@@ -1003,7 +1011,7 @@
             {
                 id: 'car3',
                 name: 'El neforepi',
-                modelUrl: 'https://raw.githubusercontent.com/chipeosimulator/Modelos/main/Elneforepiop.glb',
+                modelUrl: 'https://raw.githubusercontent.com/chipeosimulator/Modelos/main/Neforepiop.glb',
                 position: { x: 15, y: 1.5, z: -10 },
                 rotation: { x: 0, y: 0, z: 0 }, // Ajustado para que mire hacia adelante
                 scale: 1.5,
@@ -1065,7 +1073,7 @@
             {
                 id: 'silla1',
                 name: 'Silla Plástica 1',
-                modelUrl: 'https://raw.githubusercontent.com/chipeosimulator/Modelos/main/silllow.glb',
+                modelUrl: 'https://raw.githubusercontent.com/chipeosimulator/Modelos/main/Sillaop.glb',
                 position: { x: -2.73, y: 0.2, z: 11.97 },
                 rotation: { x: 0, y: 0, z: 0 },
                 scale: 1.5,
@@ -1073,9 +1081,9 @@
                 silla: true
             },
             {
-                id: 'ejemplo_edificio2',
+                id: 'silla2',
                 name: 'Edificio de Prueba',
-                modelUrl: 'https://raw.githubusercontent.com/chipeosimulator/Modelos/main/silllow.glb', // Usando link de auto como ejemplo
+                modelUrl: 'https://raw.githubusercontent.com/chipeosimulator/Modelos/main/Sillaop.glb', // Usando link de auto como ejemplo
                 position: { x: -2.73, y: 0.3, z: 17.16 },
                 rotation: { x: 0, y: 0, z: 0 },
                 scale: 1.5,
@@ -1085,7 +1093,7 @@
             {
                 id: 'ejemplo_edificio3',
                 name: 'Edificio de Prueba',
-                modelUrl: 'https://raw.githubusercontent.com/chipeosimulator/Modelos/main/colmado.glb', // Usando link de auto como ejemplo
+                modelUrl: 'https://raw.githubusercontent.com/chipeosimulator/Modelos/main/Colmadoop.glb', // Usando link de auto como ejemplo
                 position: { x: -6.79, y: 2.5, z: 14.25 },
                 rotation: { x: 0, y: 0, z: 0 },
                 scale: 8,
@@ -3402,7 +3410,7 @@
                             }
                         });
 
-                        if (selectedCarData && closestDistance < 6) {
+                        if (selectedCarData && closestDistance < 8) {
                             checkCarAvailability(selectedCarData.id).then(result => {
                                 if (!result.canJoin) {
                                     document.getElementById('status').innerText = '❌ Auto lleno (máximo 4 personas)';
