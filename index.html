@@ -498,7 +498,7 @@
             position: absolute;
             bottom: 180px;
             /* Encima del botón de acción */
-            right: 50px;
+            right: 200px;
             width: 70px;
             height: 70px;
             background: rgba(255, 200, 0, 0.6);
@@ -575,7 +575,7 @@
         }
 
         #btnNitro {
-            bottom: 120px;
+            bottom: 220px;
             right: 20px;
             width: 60px;
             height: 60px;
@@ -602,12 +602,14 @@
 <body>
     <div id="ui">
         <b>Modo:</b> <span id="mode">Jugador</span><br>
-        <b>Controles Jugador:</b> WASD + Mouse<br>
-        <b>Controles Auto:</b> Flechas o WASD<br>
-        <b>Nitro:</b> Shift (mientras manejas)<br>
-        <b>Entrar/Salir Auto:</b> E o Enter<br>
-        <b>Música del Auto:</b> F<br>
-        <b>Configuración Gráfica:</b> L<br>
+        <div id="pcControlsInfo">
+            <b>Controles Jugador:</b> WASD + Mouse<br>
+            <b>Controles Auto:</b> Flechas o WASD<br>
+            <b>Nitro:</b> Shift (mientras manejas)<br>
+            <b>Entrar/Salir Auto:</b> E o Enter<br>
+            <b>Música del Auto:</b> F<br>
+            <b>Configuración Gráfica:</b> L<br>
+        </div>
         <span id="status">Cargando modelo...</span><br>
         <div id="coordsDisplay">📍 X: 0.00 | Y: 0.00 | Z: 0.00</div>
         <span id="musicInfo" style="color: #00ff88;"></span>
@@ -1212,6 +1214,7 @@
             console.log("📱 Dispositivo móvil detectado");
             document.getElementById('mobileControls').style.display = 'block';
             document.getElementById('crosshair').style.display = 'block'; // Mostrar siempre cruz en móvil
+            document.getElementById('pcControlsInfo').style.display = 'none'; // Ocultar controles de PC en móvil
 
             // --- JOYSTICK (Movimiento) ---
             const joystickManager = nipplejs.create({
@@ -4042,17 +4045,35 @@
                 const carControls = document.getElementById('mobileCarControls');
                 const joystickZone = document.getElementById('joystickZone');
                 const actionBtn = document.getElementById('mobileActionBtn');
+                const crosshair = document.getElementById('crosshair');
 
                 if (isPlayerMode) {
                     if (carControls) carControls.style.display = 'none';
                     if (joystickZone) joystickZone.style.display = 'block';
                     if (actionBtn) actionBtn.style.display = 'flex';
-                    const isClose = (typeof cachedClosestDistance !== 'undefined' && cachedClosestDistance < 5);
+                    if (crosshair) crosshair.style.display = 'block'; // Mostrar cruz caminando
+
+                    // Verificar cercanía a Autos (cachedClosestDistance) O Sillas
+                    let isClose = (typeof cachedClosestDistance !== 'undefined' && cachedClosestDistance < 9); // Usar rango 9 como configuramos
+
+                    // Si no estamos cerca de un auto, chequear sillas
+                    if (!isClose && typeof loadedDecorations !== 'undefined') {
+                        const pPos = controls.getObject().position;
+                        for (const key in loadedDecorations) {
+                            const dec = loadedDecorations[key];
+                            if (dec.silla && dec.container && pPos.distanceTo(dec.container.position) < 4) {
+                                isClose = true;
+                                break;
+                            }
+                        }
+                    }
+
                     if (enterBtn) enterBtn.style.display = isClose ? 'flex' : 'none';
                 } else {
                     if (carControls) carControls.style.display = 'block';
                     if (joystickZone) joystickZone.style.display = 'none';
                     if (actionBtn) actionBtn.style.display = 'none';
+                    if (crosshair) crosshair.style.display = 'none'; // Ocultar cruz en auto
                     if (enterBtn) enterBtn.style.display = 'flex';
                 }
             }
