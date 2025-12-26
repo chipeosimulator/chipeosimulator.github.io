@@ -72,6 +72,7 @@
             display: none;
             min-width: 400px;
             box-shadow: 0 0 30px rgba(0, 255, 136, 0.5);
+            z-index: 2000;
         }
 
         #musicMenu h2 {
@@ -193,7 +194,7 @@
             color: white;
             min-width: 500px;
             box-shadow: 0 0 50px rgba(0, 255, 136, 0.7);
-            z-index: 1000;
+            z-index: 2002;
         }
 
         #loginMenu h2 {
@@ -320,7 +321,7 @@
             display: none;
             min-width: 400px;
             box-shadow: 0 0 30px rgba(0, 255, 136, 0.5);
-            z-index: 1001;
+            z-index: 2001;
         }
 
         #graphicsMenu h2 {
@@ -442,7 +443,160 @@
                 transform: translateY(-20px) scaleY(1.1);
             }
         }
+
+        /* CONTROLES MÓVILES */
+        #mobileControls {
+            display: none;
+            /* Se activa con JS si es móvil */
+            pointer-events: none;
+            /* Permitir clicks passthrough donde no hay botones */
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 999;
+        }
+
+        #joystickZone {
+            position: absolute;
+            bottom: 50px;
+            left: 50px;
+            width: 150px;
+            height: 150px;
+            pointer-events: auto;
+            /* El joystick debe capturar toques */
+        }
+
+        #mobileActionBtn {
+            position: absolute;
+            bottom: 80px;
+            right: 50px;
+            width: 80px;
+            height: 80px;
+            background: rgba(0, 255, 136, 0.5);
+            border: 2px solid #fff;
+            border-radius: 50%;
+            color: white;
+            font-size: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: auto;
+            cursor: pointer;
+            user-select: none;
+            touch-action: manipulation;
+        }
+
+        #mobileActionBtn:active {
+            background: rgba(0, 255, 136, 0.8);
+            transform: scale(0.95);
+        }
+
+        /* Botón específico para entrar al auto (Puerta) */
+        #mobileEnterBtn {
+            position: absolute;
+            bottom: 180px;
+            /* Encima del botón de acción */
+            right: 50px;
+            width: 70px;
+            height: 70px;
+            background: rgba(255, 200, 0, 0.6);
+            border: 2px solid #fff;
+            border-radius: 50%;
+            font-size: 35px;
+            display: flex;
+            /* Flex para centrar */
+            align-items: center;
+            justify-content: center;
+            pointer-events: auto;
+            cursor: pointer;
+            display: none;
+            /* Oculto por defecto, se muestra cerca de un auto */
+            z-index: 1001;
+        }
+
+        /* Controles de Auto Mejorados */
+        #mobileCarControls {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .car-btn {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid white;
+            border-radius: 15px;
+            pointer-events: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            user-select: none;
+            touch-action: manipulation;
+        }
+
+        .car-btn:active {
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Dirección (Izquierda/Derecha) */
+        #btnLeft {
+            bottom: 30px;
+            left: 20px;
+        }
+
+        #btnRight {
+            bottom: 30px;
+            left: 120px;
+        }
+
+        /* Pedales (Acelerar/Frenar) */
+        #btnBrake {
+            bottom: 30px;
+            right: 120px;
+            background: rgba(255, 50, 50, 0.3);
+            font-size: 30px;
+        }
+
+        #btnGas {
+            bottom: 30px;
+            right: 20px;
+            background: rgba(50, 255, 50, 0.3);
+            font-size: 30px;
+        }
+
+        #btnNitro {
+            bottom: 120px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            font-size: 25px;
+            background: rgba(0, 200, 255, 0.4);
+            border-radius: 50%;
+        }
+
+        /* Área táctil derecha para rotar cámara */
+        #touchLookZone {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 50%;
+            height: 100%;
+            pointer-events: auto;
+            touch-action: none;
+            /* Importante para prevenir scroll */
+        }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/nipplejs/0.10.1/nipplejs.min.js"></script>
 </head>
 
 <body>
@@ -459,6 +613,23 @@
         <span id="musicInfo" style="color: #00ff88;"></span>
     </div>
     <div id="crosshair"></div>
+
+    <!-- Controles Móbiles -->
+    <div id="mobileControls">
+        <div id="joystickZone"></div>
+        <div id="touchLookZone"></div> <!-- Zona derecha para mover cámara -->
+        <div id="mobileActionBtn">🖐️</div>
+        <div id="mobileEnterBtn">🚪</div>
+
+        <!-- Controles de Auto (Ocultos en modo jugador) -->
+        <div id="mobileCarControls">
+            <div id="btnLeft" class="car-btn">⬅️</div>
+            <div id="btnRight" class="car-btn">➡️</div>
+            <div id="btnBrake" class="car-btn">🛑</div>
+            <div id="btnGas" class="car-btn">⚡</div>
+            <div id="btnNitro" class="car-btn">🔥</div>
+        </div>
+    </div>
 
     <!-- Login Menu -->
     <div id="loginMenu">
@@ -515,6 +686,10 @@
         <div class="volumeControl">
             <label>Sensibilidad Bass: <span id="bassValue">50</span>%</label>
             <input type="range" id="bassSensitivity" min="0" max="100" value="50">
+        </div>
+        <div class="volumeControl" style="display: flex; align-items: center; justify-content: center;">
+            <input type="checkbox" id="audio3DCheckbox" style="margin-right: 10px; width: auto;">
+            <label for="audio3DCheckbox" style="margin: 0; cursor: pointer;">Activado Audio 3D 🎧</label>
         </div>
         <div style="text-align: center;">
             <button id="playBtn">▶️ Reproducir</button>
@@ -885,6 +1060,7 @@
 
         // 2. CÁMARA
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.rotation.order = 'YXZ'; // IMPORTANTE para evitar que la cámara se voltee (roll) al rotar
         camera.position.set(0, 2, 5);
 
         // 3. CONTROLES DE POINTER LOCK
@@ -900,8 +1076,131 @@
         const moveLeft = { active: false };
         const moveRight = { active: false };
 
+        // Detección de móvil
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+        if (isMobile) {
+            console.log("📱 Dispositivo móvil detectado");
+            document.getElementById('mobileControls').style.display = 'block';
+            document.getElementById('crosshair').style.display = 'block'; // Mostrar siempre cruz en móvil
+
+            // --- JOYSTICK (Movimiento) ---
+            const joystickManager = nipplejs.create({
+                zone: document.getElementById('joystickZone'),
+                mode: 'static',
+                position: { left: '50%', top: '50%' },
+                color: 'white',
+                size: 100
+            });
+
+            joystickManager.on('move', function (evt, data) {
+                if (data.direction) {
+                    moveForward.active = (data.direction.y === 'up');
+                    moveBackward.active = (data.direction.y === 'down');
+                    moveLeft.active = (data.direction.x === 'left');
+                    moveRight.active = (data.direction.x === 'right');
+                }
+            });
+
+            joystickManager.on('end', function () {
+                moveForward.active = false;
+                moveBackward.active = false;
+                moveLeft.active = false;
+                moveRight.active = false;
+            });
+
+            // --- BOTÓN ACCIÓN (F) ---
+            const actionBtn = document.getElementById('mobileActionBtn');
+            actionBtn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                window.dispatchEvent(new KeyboardEvent('keydown', { 'key': 'f' }));
+                // Feedback visual
+                actionBtn.style.transform = "scale(0.9)";
+                setTimeout(() => actionBtn.style.transform = "scale(1)", 100);
+            });
+
+            // --- TOUCH LOOK (Cámara) ---
+            const touchLookZone = document.getElementById('touchLookZone');
+            let previousTouchX = 0;
+            let previousTouchY = 0;
+
+            touchLookZone.addEventListener('touchstart', (e) => {
+                previousTouchX = e.touches[0].pageX;
+                previousTouchY = e.touches[0].pageY;
+            });
+
+            touchLookZone.addEventListener('touchmove', (e) => {
+                const touchX = e.touches[0].pageX;
+                const touchY = e.touches[0].pageY;
+                const deltaX = touchX - previousTouchX;
+                const deltaY = touchY - previousTouchY;
+                const sensitivity = 0.004;
+
+                // Rotación Táctil (Yaw y Pitch)
+                // Yaw (Giro Horizontal) - Afecta al cuerpo del jugador
+                controls.getObject().rotation.y -= deltaX * sensitivity;
+
+                // Pitch (Mirar Arriba/Abajo) - Afecta solo a la cámara
+                camera.rotation.x -= deltaY * sensitivity;
+                camera.rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, camera.rotation.x));
+
+                // Asegurar que no haya rotación en Z (Roll)
+                camera.rotation.z = 0;
+                controls.getObject().rotation.z = 0;
+
+                previousTouchX = touchX;
+                previousTouchY = touchY;
+            });
+
+            // --- BOTÓN ENTRAR/SALIR (PUERTA) ---
+            const enterBtn = document.getElementById('mobileEnterBtn');
+            enterBtn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                window.dispatchEvent(new KeyboardEvent('keydown', { 'key': 'e' }));
+                // Feedback visual
+                enterBtn.style.transform = "scale(0.9)";
+                setTimeout(() => enterBtn.style.transform = "scale(1)", 100);
+            });
+
+            // --- CONTROLES DE AUTO (BOTONES) ---
+            const btnLeft = document.getElementById('btnLeft');
+            const btnRight = document.getElementById('btnRight');
+            const btnGas = document.getElementById('btnGas');
+            const btnBrake = document.getElementById('btnBrake');
+            const btnNitro = document.getElementById('btnNitro');
+
+            const addTouchControl = (btn, actionObj, isNitro = false) => {
+                btn.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    if (isNitro) {
+                        window.dispatchEvent(new KeyboardEvent('keydown', { 'key': 'Shift' }));
+                    } else {
+                        actionObj.active = true;
+                    }
+                    btn.style.opacity = "0.8";
+                    btn.style.transform = "scale(0.95)";
+                });
+                btn.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    if (isNitro) {
+                        window.dispatchEvent(new KeyboardEvent('keyup', { 'key': 'Shift' }));
+                    } else {
+                        actionObj.active = false;
+                    }
+                    btn.style.opacity = "";
+                    btn.style.transform = "";
+                });
+            };
+
+            addTouchControl(btnLeft, moveLeft);
+            addTouchControl(btnRight, moveRight);
+            addTouchControl(btnGas, moveForward);
+            addTouchControl(btnBrake, moveBackward);
+            addTouchControl(btnNitro, null, true);
+        }
+
         document.addEventListener('click', () => {
-            if (isPlayerMode && !controls.isLocked && !isMusicMenuOpen) {
+            if (!isMobile && isPlayerMode && !controls.isLocked && !isMusicMenuOpen) {
                 controls.lock();
             }
         });
@@ -1046,7 +1345,12 @@
             applyGraphicsQuality(savedQuality);
         } else {
             // Default si no hay nada guardado
-            applyGraphicsQuality('normal');
+            if (isMobile) {
+                console.log("📱 Móvil detectado: Configurando gráficos en BAJO por defecto.");
+                applyGraphicsQuality('low');
+            } else {
+                applyGraphicsQuality('normal');
+            }
         }
 
         // Event listeners para el menú de configuración gráfica
@@ -1057,10 +1361,13 @@
             });
         });
 
-        document.getElementById('closeGraphicsBtn').addEventListener('click', () => {
+        const closeGraphicsHandler = (e) => {
+            if (e) e.preventDefault();
             document.getElementById('graphicsMenu').style.display = 'none';
             isMusicMenuOpen = false;
-        });
+        };
+        document.getElementById('closeGraphicsBtn').addEventListener('click', closeGraphicsHandler);
+        document.getElementById('closeGraphicsBtn').addEventListener('touchstart', closeGraphicsHandler);
 
         // 5. PISO
         const floorGeo = new THREE.PlaneGeometry(1000, 1000);
@@ -2011,8 +2318,16 @@
                 // IMPORTANTE: Conectar el elemento de audio al analizador
                 if (audioObj.audioElement && !audioObj.audioSource) {
                     audioObj.audioSource = audioContext.createMediaElementSource(audioObj.audioElement);
+
+                    // Crear nodo de paneo estéreo (Spatial Audio simplificado)
+                    if (!audioObj.pannerNode) {
+                        audioObj.pannerNode = audioContext.createStereoPanner();
+                    }
+
+                    // Conexiones: Fuente -> Analizador -> Paneo -> Ganancia -> Destino
                     audioObj.audioSource.connect(audioObj.analyser);
-                    audioObj.analyser.connect(audioObj.gainNode);
+                    audioObj.analyser.connect(audioObj.pannerNode);
+                    audioObj.pannerNode.connect(audioObj.gainNode);
                 }
             } catch (e) {
                 console.error("Error setting up analyser:", e);
@@ -2170,6 +2485,13 @@
         const musicInfo = document.getElementById('musicInfo');
         const bassLevelSpan = document.getElementById('bassLevel');
 
+        let is3DAudioEnabled = false; // Variable para control de audio 3D
+        const audio3DCheckbox = document.getElementById('audio3DCheckbox');
+
+        audio3DCheckbox.addEventListener('change', (e) => {
+            is3DAudioEnabled = e.target.checked;
+        });
+
         volumeSlider.addEventListener('input', (e) => {
             const newVolume = e.target.value / 100;
             volumeValue.textContent = e.target.value;
@@ -2318,10 +2640,13 @@
             }
         });
 
-        closeBtn.addEventListener('click', () => {
+        const closeMenuHandler = (e) => {
+            if (e) e.preventDefault();
             musicMenu.style.display = 'none';
             isMusicMenuOpen = false;
-        });
+        };
+        closeBtn.addEventListener('click', closeMenuHandler);
+        closeBtn.addEventListener('touchstart', closeMenuHandler);
 
         // Función para actualizar qué audios deben reproducirse según proximidad (Límite de 5)
         function updateAudioPriority() {
@@ -2445,7 +2770,28 @@
                         } else if (dist >= maxDistance) {
                             volumeFactor = 0;
                         } else {
+                            // calcular volumen
                             volumeFactor = 1 - (dist - minDistance) / distanceRange;
+                        }
+
+                        // --- SPATIAL AUDIO (PANEO 3D) ---
+                        if (carData.audio.pannerNode) {
+                            // Vector del jugador al auto
+                            const toCar = new THREE.Vector3().subVectors(carData.container.position, playerPos).normalize();
+
+                            // Vector de dirección de la cámara (hacia dónde mira)
+                            const camDir = new THREE.Vector3();
+                            camera.getWorldDirection(camDir);
+
+                            // Vector "Derecha" de la cámara (Producto cruz)
+                            const camRight = new THREE.Vector3().crossVectors(camDir, new THREE.Vector3(0, 1, 0));
+
+                            // Producto punto para saber qué tanto a la derecha está el auto
+                            // -1 (Izquierda) a 1 (Derecha)
+                            let panValue = toCar.dot(camRight);
+
+                            // Ajustar intensidad del paneo
+                            carData.audio.pannerNode.pan.value = is3DAudioEnabled ? panValue : 0;
                         }
                     }
 
@@ -2469,31 +2815,47 @@
             Object.values(loadedDecorations).forEach(dec => {
                 try {
                     if (dec.radio && dec.audio && dec.audio.audioElement && dec.container) {
-                        const dx = playerPos.x - dec.container.position.x;
-                        const dy = playerPos.y - dec.container.position.y;
-                        const dz = playerPos.z - dec.container.position.z;
-                        const distSq = dx * dx + dy * dy + dz * dz;
-                        const dist = Math.sqrt(distSq);
-
+                        const dist = playerPos.distanceTo(dec.container.position);
                         let volumeFactor = 0;
-                        if (dist <= minDistance) volumeFactor = 1;
-                        else if (dist >= maxDistance) volumeFactor = 0;
-                        else volumeFactor = 1 - (dist - minDistance) / distanceRange;
 
-                        dec.audio._lastFactor = volumeFactor;
+                        if (dist <= minDistance) {
+                            volumeFactor = 1;
+                        } else if (dist >= maxDistance) {
+                            volumeFactor = 0;
+                        } else {
+                            volumeFactor = 1 - (dist - minDistance) / distanceRange;
+                        }
+
+                        // --- SPATIAL AUDIO (PANEO 3D) PARA DECORACIONES ---
+                        if (dec.audio.pannerNode) {
+                            if (is3DAudioEnabled) {
+                                const toDec = new THREE.Vector3().subVectors(dec.container.position, playerPos).normalize();
+                                const camDir = new THREE.Vector3();
+                                camera.getWorldDirection(camDir);
+                                const camRight = new THREE.Vector3().crossVectors(camDir, new THREE.Vector3(0, 1, 0));
+                                let panValue = toDec.dot(camRight);
+                                dec.audio.pannerNode.pan.value = is3DAudioEnabled ? panValue : 0;
+                            } else {
+                                dec.audio.pannerNode.pan.value = 0;
+                            }
+                        }
+
+                        // Aplicar volumen
                         const targetVolume = (dec.audio.maxVolume !== undefined ? dec.audio.maxVolume : 1.0) * volumeFactor;
 
+                        // Priorizar GainNode
                         if (dec.audio.gainNode) {
                             dec.audio.gainNode.gain.setTargetAtTime(targetVolume, audioContext.currentTime, 0.05);
+                            // Audio element al 100% para que el analyzer funcione
                             if (dec.audio.audioElement.volume !== 1.0) dec.audio.audioElement.volume = 1.0;
-                        } else if (dec.audio.audioElement) {
-                            if (dec.audio.audioElement.volume !== targetVolume) {
+                        } else {
+                            if (Math.abs(dec.audio.audioElement.volume - targetVolume) > 0.01) {
                                 dec.audio.audioElement.volume = targetVolume;
                             }
                         }
                     }
                 } catch (e) {
-                    // Silenciar errores individuales para que no rompan el bucle principal
+                    // Silenciar errores individuales
                 }
             });
         }
@@ -3205,10 +3567,42 @@
                 if (now - lastStatusUpdate > STATUS_UPDATE_INTERVAL) {
                     lastStatusUpdate = now;
                     const statusEl = document.getElementById('status');
-                    if (cachedClosestDistance < 5 && cachedClosestCar) {
+
+                    const isCloseToCar = (cachedClosestDistance < 5 && cachedClosestCar);
+
+                    if (isCloseToCar) {
                         statusEl.innerText = `Presiona E para entrar al ${cachedClosestCar.name}`;
                     } else if (statusEl.innerText.includes('Presiona E')) {
                         statusEl.innerText = 'Modo Jugador - F para música';
+                    }
+
+                    // Lógica Móvil UI (MOVIDA)
+                    if (false && typeof isMobile !== 'undefined' && isMobile) {
+                        const enterBtn = document.getElementById('mobileEnterBtn');
+                        const carControls = document.getElementById('mobileCarControls');
+                        // El joystick es managed por nipplejs, se oculta el contenedor padre o visualmente
+                        const joystickZone = document.getElementById('joystickZone');
+                        const actionBtn = document.getElementById('mobileActionBtn');
+
+                        if (isPlayerMode) {
+                            // Modo Caminar
+                            if (carControls) carControls.style.display = 'none';
+                            if (joystickZone) joystickZone.style.display = 'block';
+                            if (actionBtn) actionBtn.style.display = 'flex';
+
+                            // Botón de puerta solo si cerca de auto
+                            if (enterBtn) {
+                                enterBtn.style.display = isCloseToCar ? 'flex' : 'none';
+                            }
+                        } else {
+                            // Modo Auto
+                            if (carControls) carControls.style.display = 'block';
+                            if (joystickZone) joystickZone.style.display = 'none';
+                            if (actionBtn) actionBtn.style.display = 'none'; // Ocultar botón F
+
+                            // Botón puerta siempre visible para salir
+                            if (enterBtn) enterBtn.style.display = 'flex';
+                        }
                     }
                 }
 
@@ -3447,6 +3841,30 @@
                     }
                 }
             });
+
+
+            // Mobile UI Logic (Inserted)
+            if (typeof isMobile !== 'undefined' && isMobile) {
+                const enterBtn = document.getElementById('mobileEnterBtn');
+                const carControls = document.getElementById('mobileCarControls');
+                const joystickZone = document.getElementById('joystickZone');
+                const actionBtn = document.getElementById('mobileActionBtn');
+
+                if (isPlayerMode) {
+                    if (carControls) carControls.style.display = 'none';
+                    if (joystickZone) joystickZone.style.display = 'block';
+                    if (actionBtn) actionBtn.style.display = 'flex';
+                    const isClose = (typeof cachedClosestDistance !== 'undefined' && cachedClosestDistance < 5);
+                    if (enterBtn) enterBtn.style.display = isClose ? 'flex' : 'none';
+                } else {
+                    if (carControls) carControls.style.display = 'block';
+                    if (joystickZone) joystickZone.style.display = 'none';
+                    if (actionBtn) actionBtn.style.display = 'none';
+                    if (enterBtn) enterBtn.style.display = 'flex';
+                }
+            }
+
+            renderer.render(scene, camera);
         }
 
         update();
