@@ -741,6 +741,121 @@
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
 
+        // ========================================
+        // 💾 SISTEMA DE CACHÉ PERSISTENTE (IndexedDB)
+        // ========================================
+        const DB_NAME = 'ChipeoSimulatorCache';
+        const DB_VERSION = 1;
+        const STORE_NAME = 'models';
+
+        let db = null;
+
+        function initDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+                request.onerror = (event) => {
+                    console.error("IndexedDB error:", event.target.error);
+                    resolve(null); // Fallback: funciona sin cache si falla
+                };
+
+                request.onupgradeneeded = (event) => {
+                    const db = event.target.result;
+                    if (!db.objectStoreNames.contains(STORE_NAME)) {
+                        db.createObjectStore(STORE_NAME);
+                    }
+                };
+
+                request.onsuccess = (event) => {
+                    db = event.target.result;
+                    // console.log("DB Inicializada");
+                    resolve(db);
+                };
+            });
+        }
+
+        async function getModelFromDB(url) {
+            if (!db) return null;
+            return new Promise((resolve) => {
+                const transaction = db.transaction([STORE_NAME], 'readonly');
+                const store = transaction.objectStore(STORE_NAME);
+                const request = store.get(url);
+
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => resolve(null);
+            });
+        }
+
+        async function saveModelToDB(url, buffer) {
+            if (!db) return;
+            const transaction = db.transaction([STORE_NAME], 'readwrite');
+            const store = transaction.objectStore(STORE_NAME);
+            store.put(buffer, url);
+        }
+
+        // Inicializar DB al arrancar
+        initDB();
+
+        // Función de carga unificada con caché (RAM + IndexedDB)
+        const ramCache = {}; // Cache en memoria para clones rápidos
+
+        async function loadGLTFWithCache(url, onProgress) {
+            // 1. Verificar Cache RAM (GLTF parseado)
+            if (ramCache[url]) {
+                // Si es una promesa, esperar. Si es datos, devolver.
+                if (ramCache[url] instanceof Promise) return ramCache[url];
+                return Promise.resolve(ramCache[url]);
+            }
+
+            // Crear promesa de carga para evitar peticiones duplicadas simultáneas
+            const loadPromise = new Promise(async (resolve, reject) => {
+                const loader = new GLTFLoader();
+
+                // 2. Verificar IndexedDB (ArrayBuffer)
+                try {
+                    const cachedBuffer = await getModelFromDB(url);
+                    if (cachedBuffer) {
+                        console.log(`📦 Cargando desde caché: ${url.split('/').pop()}`);
+                        loader.parse(cachedBuffer, '', (gltf) => {
+                            ramCache[url] = gltf; // Guardar en RAM
+                            resolve(gltf);
+                        }, (err) => {
+                            console.warn("Error parsing cached model, redownloading...", err);
+                            // Fallback a descarga normal si falla parseo
+                            downloadAndCache();
+                        });
+                        return;
+                    }
+                } catch (e) {
+                    console.warn("DB Cache check failed", e);
+                }
+
+                // 3. Descargar si no está en caché
+                function downloadAndCache() {
+                    const fileLoader = new THREE.FileLoader();
+                    fileLoader.setResponseType('arraybuffer');
+
+                    fileLoader.load(url, (data) => {
+                        // Guardar en DB
+                        saveModelToDB(url, data);
+
+                        // Parsear
+                        loader.parse(data, '', (gltf) => {
+                            ramCache[url] = gltf;
+                            resolve(gltf);
+                        }, reject);
+
+                    }, onProgress, reject);
+                }
+
+                downloadAndCache();
+            });
+
+            ramCache[url] = loadPromise;
+            return loadPromise;
+        }
+
+
         // Variables de estado multiplayer
         let currentPlayerId = null;
         let currentPlayerName = null;
@@ -903,16 +1018,16 @@
             {
                 id: 'car5',
                 name: 'El Pebeseta',
-                modelUrl: 'https://raw.githubusercontent.com/yoyoyogogo/pebeseta/main/stylized%20plant%203d%20model.glb',
-                position: { x: 25, y: 1.5, z: -10 },
+                modelUrl: 'https://raw.githubusercontent.com/chipeosimulator/Modelos/main/Elazulado.glb',
+                position: { x: 25, y: 3.5, z: -10 },
                 rotation: { x: 0, y: -Math.PI / 2, z: 0 }, // Ajustado para que mire hacia adelante
-                scale: 1,
+                scale: 2,
                 audio: car5Audio
             },
             {
                 id: 'car6',
                 name: 'El azulbug',
-                modelUrl: 'https://raw.githubusercontent.com/chipeosimulator/Modelos/main/Elazulbug.glb',
+                modelUrl: 'https://raw.githubusercontent.com/chipeosimulator/Modelos/main/elazulbugnt.glb',
                 position: { x: 30, y: 3.5, z: -10 },
                 rotation: { x: 0, y: -Math.PI / 2, z: 0 }, // Ajustado para que mire hacia adelante
                 scale: 2,
@@ -947,7 +1062,7 @@
             {
                 id: 'silla1',
                 name: 'Silla Plástica 1',
-                modelUrl: 'https://raw.githubusercontent.com/chipeosimulator/Modelos/main/Sillaplastica.glb',
+                modelUrl: 'https://raw.githubusercontent.com/chipeosimulator/Modelos/main/silllow.glb',
                 position: { x: -2.73, y: 0.2, z: 11.97 },
                 rotation: { x: 0, y: 0, z: 0 },
                 scale: 1.5,
@@ -957,7 +1072,7 @@
             {
                 id: 'ejemplo_edificio2',
                 name: 'Edificio de Prueba',
-                modelUrl: 'https://raw.githubusercontent.com/chipeosimulator/Modelos/main/Sillaplastica.glb', // Usando link de auto como ejemplo
+                modelUrl: 'https://raw.githubusercontent.com/chipeosimulator/Modelos/main/silllow.glb', // Usando link de auto como ejemplo
                 position: { x: -2.73, y: 0.3, z: 17.16 },
                 rotation: { x: 0, y: 0, z: 0 },
                 scale: 1.5,
@@ -967,7 +1082,7 @@
             {
                 id: 'ejemplo_edificio3',
                 name: 'Edificio de Prueba',
-                modelUrl: 'https://raw.githubusercontent.com/chipeosimulator/Modelos/main/colmados.glb', // Usando link de auto como ejemplo
+                modelUrl: 'https://raw.githubusercontent.com/chipeosimulator/Modelos/main/colmado.glb', // Usando link de auto como ejemplo
                 position: { x: -6.79, y: 2.5, z: 14.25 },
                 rotation: { x: 0, y: 0, z: 0 },
                 scale: 8,
@@ -1248,15 +1363,17 @@
             if (quality === 'low') {
                 // BAJO: Reducir distancias de renderizado considerablemente
                 LOD_DISTANCE_NEAR = 10;
-                LOD_DISTANCE_MID = 25;
-                LOD_DISTANCE_FAR = 40;
-                VISIBILITY_DISTANCE = 70;
+                LOD_DISTANCE_MID = 20;
+                LOD_DISTANCE_FAR = 30;
+                VISIBILITY_DISTANCE = 50; // Reducido de 70
 
-                // DESACTIVAR SOMBRAS PARA BAJO RENDIMIENTO
+                // DESACTIVAR SOMBRAS TOTALMENTE (Renderer)
+                renderer.shadowMap.enabled = false;
+                renderer.setPixelRatio(1); // Forzar resolución base
+
                 sun.castShadow = false;
-                ambientLight.intensity = 1.0; // Compensar falta de sol con más luz ambiente
+                ambientLight.intensity = 1.0;
 
-                // Sol en posición normal
                 sun.position.set(50, 50, 50);
                 sun.intensity = 0.5;
 
@@ -1267,7 +1384,11 @@
                 LOD_DISTANCE_FAR = 100;
                 VISIBILITY_DISTANCE = 150;
 
-                // ACTIVAR SOMBRAS ESTÁNDAR
+                // ACTIVAR SOMBRAS
+                renderer.shadowMap.enabled = true;
+                renderer.shadowMap.type = THREE.BasicShadowMap;
+                renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.2));
+
                 sun.castShadow = true;
                 sun.shadow.mapSize.width = 1024; // Calidad media de sombras
                 sun.shadow.mapSize.height = 1024;
@@ -1275,16 +1396,19 @@
                 sun.shadow.bias = -0.0001;
                 ambientLight.intensity = 0.8;
 
-                // Sol en posición normal
                 sun.position.set(50, 50, 50);
                 sun.intensity = 1;
 
             } else if (quality === 'high') {
                 // ALTO: Iluminación mejorada con sol centrado
-                LOD_DISTANCE_NEAR = 30;
-                LOD_DISTANCE_MID = 60;
-                LOD_DISTANCE_FAR = 100;
-                VISIBILITY_DISTANCE = 150;
+                LOD_DISTANCE_NEAR = 50; // Mejorado
+                LOD_DISTANCE_MID = 100;
+                LOD_DISTANCE_FAR = 200;
+                VISIBILITY_DISTANCE = 300;
+
+                renderer.shadowMap.enabled = true;
+                renderer.shadowMap.type = THREE.PCFSoftShadowMap; // Mejores sombras
+                renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
 
                 // Máxima calidad de sombras - ASEGURAR QUE ESTÉN ACTIVAS
                 sun.castShadow = true;
@@ -1490,97 +1614,93 @@
                 const container = new THREE.Group();
                 scene.add(container);
 
-                const loader = new GLTFLoader();
-
-                loader.load(
-                    config.modelUrl,
-                    (gltf) => {
-                        const model = gltf.scene;
-
-                        // Centrar modelo
-                        const box = new THREE.Box3().setFromObject(model);
-                        const size = box.getSize(new THREE.Vector3()).length();
-                        const center = box.getCenter(new THREE.Vector3());
-
-                        model.position.x = -center.x;
-                        model.position.z = -center.z;
-                        model.position.y = -box.min.y;
-
-                        // Aplicar rotación de configuración
-                        model.rotation.x = config.rotation.x;
-                        model.rotation.y = config.rotation.y;
-                        model.rotation.z = config.rotation.z;
-
-                        // Escalar modelo
-                        const scaleFactor = (8 / size) * config.scale;
-                        model.scale.set(scaleFactor, scaleFactor, scaleFactor);
-
-                        // Habilitar sombras y configurar LOD
-                        const meshes = [];
-                        model.traverse(n => {
-                            if (n.isMesh) {
-                                n.castShadow = true;
-                                n.receiveShadow = true;
-                                n.frustumCulled = true; // Habilitar frustum culling por mesh
-                                meshes.push(n);
-                            }
-                        });
-
-                        container.add(model);
-                        container.position.set(config.position.x, config.position.y || 1.5, config.position.z);
-
-                        // Guardar referencia a meshes para LOD
-                        container.userData.meshes = meshes;
-                        container.userData.originalMaterials = meshes.map(m => m.material);
-                        container.userData.lastLODUpdate = 0;
-
-                        // Calcular collision box
-                        const carBox = new THREE.Box3().setFromObject(container);
-                        const carSize = carBox.getSize(new THREE.Vector3());
-                        const collisionBox = {
-                            width: carSize.x * 0.8,
-                            length: carSize.z * 0.8,
-                            height: carSize.y
-                        };
-
-                        // Guardar en loadedCars
-                        loadedCars[config.id] = {
-                            id: config.id,
-                            name: config.name,
-                            model: model,
-                            container: container,
-                            collisionBox: collisionBox,
-                            baseY: config.position.y || 1.5,
-                            bounce: 0,
-                            audio: config.audio,
-                            frustumCulled: true // Habilitar frustum culling
-                        };
-
-                        // Compatibilidad con código legacy
-                        if (config.id === 'car1') {
-                            car = model;
-                            carContainer = container;
-                            carCollisionBox = collisionBox;
-                            carBaseY = config.position.y || 1.5;
-                        } else if (config.id === 'car2') {
-                            car2 = model;
-                            car2Container = container;
-                            car2CollisionBox = collisionBox;
-                            car2BaseY = config.position.y || 1.5;
-                        }
-
-                        console.log(`✅ ${config.name} cargado!`);
-                        resolve(loadedCars[config.id]);
-                    },
-                    (xhr) => {
+                loadGLTFWithCache(config.modelUrl, (xhr) => {
+                    if (xhr.lengthComputable) {
                         const progress = (xhr.loaded / xhr.total * 100).toFixed(2);
                         console.log(`${config.name} cargando: ${progress}%`);
-                    },
-                    (error) => {
-                        console.error(`❌ Error cargando ${config.name}:`, error);
-                        reject(error);
                     }
-                );
+                }).then((cachedGltf) => {
+                    // CLONAR LA ESCENA para tener una instancia independiente
+                    const model = cachedGltf.scene.clone();
+
+                    // Centrar modelo
+                    const box = new THREE.Box3().setFromObject(model);
+                    const size = box.getSize(new THREE.Vector3()).length();
+                    const center = box.getCenter(new THREE.Vector3());
+
+                    model.position.x = -center.x;
+                    model.position.z = -center.z;
+                    model.position.y = -box.min.y;
+
+                    // Aplicar rotación de configuración
+                    model.rotation.x = config.rotation.x;
+                    model.rotation.y = config.rotation.y;
+                    model.rotation.z = config.rotation.z;
+
+                    // Escalar modelo
+                    const scaleFactor = (8 / size) * config.scale;
+                    model.scale.set(scaleFactor, scaleFactor, scaleFactor);
+
+                    // Habilitar sombras y configurar LOD
+                    const meshes = [];
+                    model.traverse(n => {
+                        if (n.isMesh) {
+                            n.castShadow = true;
+                            n.receiveShadow = true;
+                            n.frustumCulled = true; // Habilitar frustum culling por mesh
+                            meshes.push(n);
+                        }
+                    });
+
+                    container.add(model);
+                    container.position.set(config.position.x, config.position.y || 1.5, config.position.z);
+
+                    // Guardar referencia a meshes para LOD
+                    container.userData.meshes = meshes;
+                    container.userData.originalMaterials = meshes.map(m => m.material);
+                    container.userData.lastLODUpdate = 0;
+
+                    // Calcular collision box
+                    const carBox = new THREE.Box3().setFromObject(container);
+                    const carSize = carBox.getSize(new THREE.Vector3());
+                    const collisionBox = {
+                        width: carSize.x * 0.8,
+                        length: carSize.z * 0.8,
+                        height: carSize.y
+                    };
+
+                    // Guardar en loadedCars
+                    loadedCars[config.id] = {
+                        id: config.id,
+                        name: config.name,
+                        model: model,
+                        container: container,
+                        collisionBox: collisionBox,
+                        baseY: config.position.y || 1.5,
+                        bounce: 0,
+                        audio: config.audio,
+                        frustumCulled: true // Habilitar frustum culling
+                    };
+
+                    // Compatibilidad con código legacy
+                    if (config.id === 'car1') {
+                        car = model;
+                        carContainer = container;
+                        carCollisionBox = collisionBox;
+                        carBaseY = config.position.y || 1.5;
+                    } else if (config.id === 'car2') {
+                        car2 = model;
+                        car2Container = container;
+                        car2CollisionBox = collisionBox;
+                        car2BaseY = config.position.y || 1.5;
+                    }
+
+                    console.log(`✅ ${config.name} cargado!`);
+                    resolve(loadedCars[config.id]);
+                }).catch((error) => {
+                    console.error(`❌ Error cargando ${config.name}:`, error);
+                    reject(error);
+                });
             });
         }
 
@@ -1596,17 +1716,9 @@
 
                 const modelUrl = config.modelUrl;
 
-                // Si el modelo ya se está cargando o ya se cargó, usar el cache
-                if (!modelCache[modelUrl]) {
-                    // Si es la primera vez que se pide este link, crear una promesa de carga
-                    const loader = new GLTFLoader();
-                    modelCache[modelUrl] = new Promise((res, rej) => {
-                        loader.load(modelUrl, (gltf) => res(gltf), undefined, (err) => rej(err));
-                    });
-                }
-
-                // Esperar a que el modelo base esté listo y clonarlo
-                modelCache[modelUrl].then((gltf) => {
+                // USAR SISTEMA PERSISTENTE (IndexedDB + RAM)
+                loadGLTFWithCache(modelUrl).then((cachedGltf) => {
+                    const gltf = cachedGltf; // Alias para compatibilidad con código existente
                     const model = gltf.scene.clone(); // CLONAR: Muy rápido y ligero
 
                     // Configurar posición base dentro del contenedor para centrado
