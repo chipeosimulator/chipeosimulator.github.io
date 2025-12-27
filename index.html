@@ -1849,6 +1849,98 @@
         }
         scene.add(instancedFlowers);
 
+        // --- BLOQUES DE HORMIGÓN REALISTAS ---
+        function createConcreteTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 512; canvas.height = 512;
+            const ctx = canvas.getContext('2d');
+
+            // Base
+            ctx.fillStyle = '#949494';
+            ctx.fillRect(0, 0, 512, 512);
+
+            // Manchas
+            for (let i = 0; i < 30; i++) {
+                ctx.fillStyle = `rgba(0,0,0,${Math.random() * 0.1})`;
+                ctx.beginPath();
+                ctx.arc(Math.random() * 512, Math.random() * 512, Math.random() * 100, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // Grano
+            for (let i = 0; i < 40000; i++) {
+                const gray = Math.random() * 60 + 80;
+                ctx.fillStyle = `rgb(${gray},${gray},${gray})`;
+                const size = Math.random() * 1.5;
+                ctx.fillRect(Math.random() * 512, Math.random() * 512, size, size);
+            }
+
+            const tex = new THREE.CanvasTexture(canvas);
+            tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+            return tex;
+        }
+
+        const blockConcreteMat = new THREE.MeshStandardMaterial({
+            map: createConcreteTexture(),
+            roughness: 0.9,
+            metalness: 0.05
+        });
+
+        // Geometría Compartida
+        const blockShape = new THREE.Shape();
+        const bWidth = 4, bDepth = 2; // Dimensiones originales del usuario
+        blockShape.moveTo(-bWidth / 2, -bDepth / 2);
+        blockShape.lineTo(bWidth / 2, -bDepth / 2);
+        blockShape.lineTo(bWidth / 2, bDepth / 2);
+        blockShape.lineTo(-bWidth / 2, bDepth / 2);
+        blockShape.lineTo(-bWidth / 2, -bDepth / 2);
+
+        function createRoundedRectHole(w, h, r, xOffset) {
+            const hole = new THREE.Path();
+            hole.moveTo(xOffset + w / 2, -h / 2 + r);
+            hole.absarc(xOffset + w / 2 - r, -h / 2 + r, r, 0, Math.PI * 1.5, true);
+            hole.absarc(xOffset - w / 2 + r, -h / 2 + r, r, Math.PI * 1.5, Math.PI, true);
+            hole.absarc(xOffset - w / 2 + r, h / 2 - r, r, Math.PI, Math.PI * 0.5, true);
+            hole.absarc(xOffset + w / 2 - r, h / 2 - r, r, Math.PI * 0.5, 0, true);
+            return hole;
+        }
+        blockShape.holes.push(createRoundedRectHole(1.4, 1.4, 0.3, -1));
+        blockShape.holes.push(createRoundedRectHole(1.4, 1.4, 0.3, 1));
+
+        const blockGeometry = new THREE.ExtrudeGeometry(blockShape, {
+            steps: 1,
+            depth: 2, // Altura extrusion
+            bevelEnabled: true,
+            bevelThickness: 0.05,
+            bevelSize: 0.05,
+            bevelSegments: 3
+        });
+        blockGeometry.center(); // Centrar para facilitar posicionamiento
+
+        function crearBloque(x, y, z, rotY = 0) {
+            const block = new THREE.Mesh(blockGeometry, blockConcreteMat);
+            block.position.set(x, y, z);
+            block.rotation.x = -Math.PI / 2; // Acostado
+            block.rotation.z = rotY; // Rotación en el suelo (al estar acostado, eje Z es Y visual)
+
+            // Escalar para que tenga sentido en la escena (4x2x2 es muy grande, reducimos a 0.2 -> 80cm)
+            block.scale.set(0.4, 0.4, 0.4);
+
+            block.castShadow = true;
+            block.receiveShadow = true;
+            scene.add(block);
+        }
+
+        // Poner bloques de ejemplo (Escala 0.4)
+        crearBloque(-7, 0.4, 25, Math.PI / 4);
+        crearBloque(-3, 0.4, 22, 0);
+        crearBloque(-7, 1.2, 25, -Math.PI / 6); // Apilado
+
+        // 3 Bloques extra
+        crearBloque(-5, 0.4, 24, Math.PI / 3);
+        crearBloque(-5, 1.2, 24, 0); // Apilado
+        crearBloque(-1, 0.4, 23, -Math.PI / 2);
+
         // ========================================
         // 🚗 CARGA DINÁMICA DE AUTOS
         // ========================================
