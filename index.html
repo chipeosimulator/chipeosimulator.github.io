@@ -1696,6 +1696,102 @@
             ultimoPosteDer = pts;
         }
 
+        // --- LETRERO COLMADO (KA SUPPLY) ---
+        function createSignTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 512;
+            canvas.height = 256;
+            const ctx = canvas.getContext('2d');
+
+            // Fondo Negro
+            ctx.fillStyle = '#1a1a1a';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Franja Rosa Inferior
+            ctx.fillStyle = '#d63384';
+            ctx.beginPath();
+            ctx.moveTo(0, 180);
+            ctx.bezierCurveTo(128, 160, 384, 160, 512, 180);
+            ctx.lineTo(512, 256);
+            ctx.lineTo(0, 256);
+            ctx.fill();
+
+            // Texto Principal
+            ctx.fillStyle = 'white';
+            ctx.textAlign = 'center';
+            ctx.font = 'bold 86px Serif';
+            ctx.fillText('Colmado', canvas.width / 2, 80);
+
+            ctx.font = 'bold 43px Sans-serif';
+            ctx.fillText('EL Patron', canvas.width / 2, 130);
+
+            ctx.font = '23px Sans-serif';
+            ctx.fillText('Delivery grati', canvas.width / 2, 155);
+
+            // Teléfono en la parte rosa
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 22px Sans-serif';
+            ctx.fillText('829-2pal de frito una hala y un mulito', canvas.width / 2, 230);
+
+            return new THREE.CanvasTexture(canvas);
+        }
+
+        function crearLetrero(x, y, z) {
+            const group = new THREE.Group();
+
+            // Textura
+            const signTexture = createSignTexture();
+
+            // 1. El Poste
+            const poleGeometry = new THREE.BoxGeometry(0.3, 12, 0.3);
+            const poleMaterial = new THREE.MeshStandardMaterial({ color: 0x707070 });
+            const pole = new THREE.Mesh(poleGeometry, poleMaterial);
+            pole.position.y = 6; // Para que la base esté en 0
+            pole.castShadow = true;
+            pole.receiveShadow = true;
+            group.add(pole);
+
+            // 2. La Caja del Letrero
+            const boxGeometry = new THREE.BoxGeometry(5, 2.5, 0.6);
+
+            // Materiales
+            const boxBaseMat = new THREE.MeshStandardMaterial({ color: 0x222222 });
+            const boxFaceMat = new THREE.MeshStandardMaterial({ map: signTexture });
+            const boxMaterials = [
+                boxBaseMat, // Right
+                boxBaseMat, // Left
+                boxBaseMat, // Top
+                boxBaseMat, // Bottom
+                boxFaceMat, // Front (+Z)
+                boxFaceMat, // Back (-Z)
+            ];
+
+            const signBox = new THREE.Mesh(boxGeometry, boxMaterials);
+            signBox.position.set(2.4, 10, 0); // Altura ajustada relativa al poste
+            signBox.castShadow = true;
+            group.add(signBox);
+
+            // 3. Sujetadores
+            const bracketGeo = new THREE.BoxGeometry(0.5, 0.1, 0.1);
+            const bracket1 = new THREE.Mesh(bracketGeo, poleMaterial);
+            bracket1.position.set(0.3, 10.8, 0);
+            group.add(bracket1);
+
+            const bracket2 = new THREE.Mesh(bracketGeo, poleMaterial);
+            bracket2.position.set(0.3, 9.2, 0);
+            group.add(bracket2);
+
+            // Posicionar Grupo
+            group.position.set(x, y, z);
+            group.rotation.y = 0; // Mirar al frente (eje Z)
+
+            scene.add(group);
+        }
+
+        // Crear letrero cerca del colmado (X=-6.79, Z=14.25)
+        // Lo ponemos al otro lado (derecha del edificio, ~ -3) y más adelante (Z ~ 18)
+        crearLetrero(-5, 0, 20);
+
         // VEGETACIÓN OPTIMIZADA (INSTANCED MESH)
         // Esto permite dibujar miles de árboles/flores con un solo dibujo (Draw Call)
         const treeCount = 60;
