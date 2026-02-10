@@ -28,6 +28,10 @@
         content="https://raw.githubusercontent.com/chipeosimulator/Modelos/main/thumbnail.png">
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/chipeosimulator/Modelos/main/logo.png">
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+
     <style>
         body {
             margin: 0;
@@ -64,104 +68,276 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.9);
-            padding: 30px;
-            border-radius: 15px;
-            border: 2px solid #00ff88;
+            background: rgba(15, 15, 15, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 20px 25px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
             color: white;
             display: none;
-            min-width: 400px;
-            box-shadow: 0 0 30px rgba(0, 255, 136, 0.5);
+            min-width: 420px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
             z-index: 2000;
+            font-family: 'Outfit', sans-serif;
         }
 
         #musicMenu h2 {
             margin-top: 0;
+            margin-bottom: 15px;
             color: #00ff88;
             text-align: center;
+            font-size: 20px;
+            font-weight: 800;
         }
 
-        #musicMenu input {
+        #musicMenu input[type="text"] {
             width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border: 2px solid #00ff88;
-            border-radius: 5px;
-            background: rgba(0, 0, 0, 0.5);
+            padding: 10px 14px;
+            margin: 5px 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.05);
             color: white;
-            font-size: 14px;
+            font-size: 13px;
             box-sizing: border-box;
         }
 
         #musicMenu button {
-            padding: 10px 20px;
-            margin: 5px;
+            padding: 10px 15px;
+            margin: 4px;
             border: none;
-            border-radius: 5px;
+            border-radius: 10px;
             cursor: pointer;
-            font-size: 14px;
-            transition: all 0.3s;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s;
         }
 
         #playBtn {
             background: #00ff88;
-            color: black;
-            font-weight: bold;
-        }
-
-        #playBtn:hover {
-            background: #00cc6a;
-            transform: scale(1.05);
+            color: #000;
+            flex: 2;
         }
 
         #stopBtn {
             background: #ff4444;
             color: white;
+            box-shadow: 0 4px 15px rgba(255, 68, 68, 0.3);
         }
 
         #stopBtn:hover {
             background: #cc0000;
+            transform: translateY(-1px);
         }
 
         #closeBtn {
-            background: #666;
-            color: white;
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(255, 255, 255, 0.1) !important;
+            color: #fff !important;
+            width: 32px;
+            height: 32px;
+            padding: 0 !important;
+            display: flex !important;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50% !important;
+            margin: 0 !important;
+            z-index: 10;
         }
 
         #closeBtn:hover {
-            background: #888;
+            background: rgba(255, 68, 68, 0.8) !important;
+            transform: rotate(90deg);
         }
 
         .musicStatus {
             margin-top: 15px;
-            padding: 10px;
-            background: rgba(0, 255, 136, 0.1);
-            border-radius: 5px;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 10px;
             text-align: center;
+            font-size: 12px;
+            color: #888;
         }
 
         .volumeControl {
-            margin: 15px 0;
+            margin: 12px 0;
         }
 
         .volumeControl label {
-            display: block;
-            margin-bottom: 5px;
-            color: #00ff88;
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+            color: #ddd;
+            font-size: 12px;
         }
 
         .volumeControl input[type="range"] {
+            -webkit-appearance: none;
             width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            outline: none;
+        }
+
+        .volumeControl input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 14px;
+            height: 14px;
+            background: #00ff88;
+            border-radius: 50%;
+            cursor: pointer;
         }
 
         .bassIndicator {
-            margin-top: 10px;
-            padding: 8px;
-            background: rgba(255, 0, 100, 0.2);
-            border-radius: 5px;
+            margin-top: 15px;
+            padding: 12px;
+            background: rgba(255, 0, 100, 0.1);
+            border-radius: 12px;
             text-align: center;
-            color: #ff0066;
+            color: #ff6b9d;
+            font-weight: 700;
+            font-size: 14px;
+            border: 1px solid rgba(255, 107, 157, 0.1);
+        }
+
+        /* Estilos para canciones predefinidas */
+        .predefined-list {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 10px 0;
+            max-height: 140px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .song-btn {
+            background: rgba(255, 255, 255, 0.05) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            color: white !important;
+            padding: 10px !important;
+            border-radius: 10px !important;
+            text-align: left !important;
+            font-size: 12px !important;
+        }
+
+        .song-btn:hover {
+            background: rgba(0, 255, 136, 0.1) !important;
+            border-color: rgba(0, 255, 136, 0.3) !important;
+        }
+
+        .song-btn .icon {
+            font-size: 16px;
+        }
+
+        .predefined-title {
+            color: #fff;
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #helpMusicBtn {
+            background: rgba(0, 255, 136, 0.1);
+            color: #00ff88;
+            border: 1px solid rgba(0, 255, 136, 0.2);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            cursor: pointer;
+        }
+
+        /* Modal de Ayuda */
+        #musicHelpModal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(10, 10, 10, 0.9);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            padding: 30px;
+            border-radius: 28px;
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            color: white;
+            z-index: 3000;
+            width: 90%;
+            max-width: 600px;
+            max-height: 85vh;
+            overflow-y: auto;
+            display: none;
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.9);
+            font-family: 'Outfit', sans-serif;
+        }
+
+        #musicHelpModal::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #musicHelpModal::-webkit-scrollbar-thumb {
+            background: #00ff88;
+            border-radius: 10px;
+        }
+
+        #musicHelpModal h3 {
+            color: #00ff88;
+            margin-top: 0;
+            font-size: 22px;
+            font-weight: 800;
+            margin-bottom: 20px;
+        }
+
+        #musicHelpModal p {
+            line-height: 1.6;
+            color: #ccc;
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+
+        #musicHelpModal b {
+            color: #00ff88;
+        }
+
+        .help-step-img {
+            width: 100%;
+            border-radius: 12px;
+            margin: 10px 0 20px 0;
+            border: 1px solid rgba(0, 255, 136, 0.2);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .help-link {
+            color: #00ff88;
+            text-decoration: underline;
             font-weight: bold;
+        }
+
+        #closeHelpBtn {
+            background: #fff;
+            color: #000;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 12px;
+            cursor: pointer;
+            margin-top: 30px;
+            width: 100%;
+            font-weight: 700;
+            transition: all 0.3s;
+        }
+
+        #closeHelpBtn:hover {
+            background: #00ff88;
+            transform: scale(1.02);
         }
 
         .loading {
@@ -187,13 +363,16 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.95);
+            background: rgba(0, 0, 0, 0.4);
+            /* Mucho más transparente */
+            backdrop-filter: blur(10px);
+            /* Efecto cristal */
             padding: 40px;
             border-radius: 20px;
             border: 3px solid #00ff88;
             color: white;
             min-width: 500px;
-            box-shadow: 0 0 50px rgba(0, 255, 136, 0.7);
+            box-shadow: 0 0 50px rgba(0, 255, 136, 0.5);
             z-index: 2002;
         }
 
@@ -444,6 +623,76 @@
             }
         }
 
+        /* PANTALLA DE CARGA */
+        #loadingScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #0a0a0a 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease-out;
+        }
+
+        #loadingScreen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loading-logo {
+            font-size: 48px;
+            font-weight: bold;
+            color: #00ff88;
+            text-shadow: 0 0 20px rgba(0, 255, 136, 0.8);
+            margin-bottom: 30px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .loading-bar-container {
+            width: 300px;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .loading-bar {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #00ff88, #00cc6a);
+            border-radius: 10px;
+            transition: width 0.3s ease;
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+        }
+
+        .loading-text {
+            color: #aaa;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(0, 255, 136, 0.2);
+            border-top-color: #00ff88;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
         /* CONTROLES MÓVILES */
         #mobileControls {
             display: none;
@@ -595,6 +844,423 @@
             touch-action: none;
             /* Importante para prevenir scroll */
         }
+
+        /* ========================================
+           📱 CELULAR AVANZADO
+           ======================================== */
+        #phone {
+            position: absolute;
+            bottom: -600px;
+            right: 50px;
+            width: 280px;
+            height: 520px;
+            background: #111;
+            border: 10px solid #333;
+            border-radius: 40px;
+            transition: bottom 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.9);
+            z-index: 2500;
+        }
+
+        #phone.active {
+            bottom: 30px;
+        }
+
+        #phone-screen {
+            flex: 1;
+            background: url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=300&q=80');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        #phone-header {
+            padding: 10px 15px;
+            font-size: 11px;
+            color: white;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+            backdrop-filter: blur(5px);
+        }
+
+        /* Pantallas del celular */
+        .screen-content {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .screen-content.active {
+            display: flex;
+        }
+
+        /* Menú de Apps */
+        .app-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 25px;
+            padding: 40px 30px;
+            justify-items: center;
+        }
+
+        .app-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 35px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+        }
+
+        .app-icon:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+        }
+
+        .app-icon.garaje {
+            background: linear-gradient(135deg, #00ff88, #00cc6a);
+        }
+
+        .app-icon.whapp {
+            background: linear-gradient(135deg, #25D366, #128C7E);
+        }
+
+        .app-label {
+            color: white;
+            font-size: 13px;
+            margin-top: 8px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px black;
+        }
+
+        /* Header de Apps */
+        .app-header {
+            background: #00ff88;
+            color: black;
+            padding: 12px;
+            font-weight: bold;
+            text-align: center;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .app-header.whapp-header {
+            background: #075e54;
+            color: white;
+        }
+
+        .back-btn {
+            cursor: pointer;
+            font-size: 20px;
+            padding: 5px;
+        }
+
+        /* Lista de items (Garaje / Contactos) */
+        .list-item {
+            padding: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            cursor: pointer;
+            background: rgba(0, 0, 0, 0.6);
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .list-item:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .list-item .icon {
+            font-size: 24px;
+        }
+
+        .list-item .info {
+            flex: 1;
+        }
+
+        .list-item .name {
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .list-item .status {
+            font-size: 11px;
+            color: #aaa;
+        }
+
+        /* Chat de WhatsApp */
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+            background: #0b141a;
+        }
+
+        .chat-date {
+            padding: 10px;
+            color: #8696a0;
+            font-size: 11px;
+            text-align: center;
+        }
+
+        .chat-bubble {
+            background: #056162;
+            color: white;
+            padding: 10px 12px;
+            margin: 5px 10px;
+            border-radius: 8px;
+            font-size: 13px;
+            align-self: flex-start;
+            max-width: 70%;
+            word-wrap: break-word;
+        }
+
+        .chat-bubble.sent {
+            background: #202c33;
+            align-self: flex-end;
+        }
+
+        /* Status message */
+        #status-msg {
+            margin-top: auto;
+            padding: 12px;
+            font-size: 12px;
+            color: #00ff88;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.7);
+        }
+
+        /* Footer del celular */
+        #phone-footer {
+            height: 50px;
+            background: #111;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .home-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 3px solid #444;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .home-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Scrollbar personalizado para el celular */
+        .screen-content::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .screen-content::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        /* Botoncito de Celular en HUD - Estilo Game UI (Roblox/Fortnite) */
+        #phoneHudBtn {
+            position: fixed;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 55px;
+            /* Más pequeño */
+            height: 55px;
+            background: #ffcc00;
+            border: 3px solid #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 1000;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            user-select: none;
+            display: none;
+        }
+
+        #phoneHudBtn:hover {
+            background: #ffdd33;
+            transform: translateY(-50%) scale(1.1);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+        }
+
+        #phoneHudBtn:active {
+            transform: translateY(-50%) scale(0.9);
+        }
+
+        #phoneHudBtn .emoji {
+            font-size: 24px;
+        }
+
+        /* Hint de tecla estilo Roblox/Fortnite */
+        #phoneHudBtn .key-p {
+            position: absolute;
+            bottom: -2px;
+            right: -2px;
+            width: 22px;
+            height: 22px;
+            background: #fff;
+            border: 2px solid #333;
+            border-radius: 5px;
+            /* Cuadradito redondeado */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 13px;
+            color: #000;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Botón de Discord */
+        #discordHudBtn {
+            position: fixed;
+            right: 20px;
+            top: calc(50% - 65px);
+            /* Posicionado sobre el cel */
+            transform: translateY(-50%);
+            width: 55px;
+            height: 55px;
+            background: #5865F2;
+            /* Color Discord */
+            border: 3px solid #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 1000;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            user-select: none;
+            display: none;
+        }
+
+        #discordHudBtn:hover {
+            background: #7289da;
+            transform: translateY(-50%) scale(1.1);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+        }
+
+        #discordHudBtn:active {
+            transform: translateY(-50%) scale(0.9);
+        }
+
+        #discordHudBtn svg {
+            width: 32px;
+            height: 32px;
+            fill: white;
+        }
+
+
+        .screen-content::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 2px;
+        }
+
+        .chat-container::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .chat-container::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .chat-container::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 2px;
+        }
+
+        /* Estilos para notas de voz */
+        .voice-note {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            background: rgba(0, 0, 0, 0.15);
+            border-radius: 10px;
+            max-width: 250px;
+        }
+
+        .voice-note-icon {
+            font-size: 22px;
+            flex-shrink: 0;
+        }
+
+        .voice-note-player {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .voice-note-btn {
+            background: #00a884;
+            border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 14px;
+            flex-shrink: 0;
+            transition: background 0.2s;
+        }
+
+        .voice-note-btn:hover {
+            background: #00c896;
+        }
+
+        .voice-note-duration {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.8);
+            flex-shrink: 0;
+            min-width: 35px;
+            text-align: right;
+        }
+
+        .voice-note-waveform {
+            flex: 1;
+            height: 24px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .voice-note-progress {
+            height: 100%;
+            background: linear-gradient(90deg, #00a884, #00c896);
+            border-radius: 12px;
+            transition: width 0.1s linear;
+            box-shadow: 0 0 8px rgba(0, 168, 132, 0.5);
+        }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/nipplejs/0.10.1/nipplejs.min.js"></script>
 </head>
@@ -608,6 +1274,7 @@
             <b>Nitro:</b> Shift (mientras manejas)<br>
             <b>Entrar/Salir Auto:</b> E o Enter<br>
             <b>Música del Auto:</b> F<br>
+            <b>Celular:</b> P 📱<br>
             <b>Configuración Gráfica:</b> L<br>
         </div>
         <span id="status">Cargando modelo...</span><br>
@@ -615,6 +1282,65 @@
         <span id="musicInfo" style="color: #00ff88;"></span>
     </div>
     <div id="crosshair"></div>
+
+    <!-- Botón de Discord (Nuevo) -->
+    <div id="discordHudBtn" onclick="window.open('https://discord.gg/2DAAYs2r', '_blank')">
+        <svg viewBox="0 0 127.14 96.36">
+            <path
+                d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.71,32.65-1.82,56.6.39,80.21a105.73,105.73,0,0,0,32.77,16.15,77.7,77.7,0,0,0,7.07-11.39,67.42,67.42,0,0,1-11.35-5.41c.97-.71,1.91-1.46,2.83-2.26a74.58,74.58,0,0,0,64.59,0c.93.8,1.87,1.55,2.83,2.26a67.46,67.46,0,0,1-11.35,5.41,78.45,78.45,0,0,0,7.07,11.39,105.09,105.09,0,0,0,32.81-16.15c2.69-27.17-4.43-50.77-19.4-72.13ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,46,96.12,53,91.08,65.69,84.69,65.69Z" />
+        </svg>
+    </div>
+
+    <!-- Botón de Celular en HUD -->
+    <div id="phoneHudBtn" onclick="togglePhone()">
+        <div class="emoji">📱</div>
+        <div class="key-p">P</div>
+    </div>
+
+    <!-- Botón de Mapa en HUD (Nuevo) -->
+    <div id="mapHudBtn" onclick="window.dispatchEvent(new KeyboardEvent('keydown', { 'key': 'm' }))">
+        <div class="emoji">🗺️</div>
+        <div class="key-p">M</div>
+    </div>
+
+    <style>
+        #mapHudBtn {
+            position: absolute;
+            bottom: 200px;
+            left: 20px;
+            width: 50px;
+            height: 50px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid #00ff88;
+            border-radius: 12px;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 1001;
+            transition: all 0.3s;
+        }
+
+        #mapHudBtn:hover {
+            transform: scale(1.1);
+            background: rgba(0, 255, 136, 0.2);
+        }
+
+        #mapHudBtn .emoji {
+            font-size: 20px;
+        }
+
+        #mapHudBtn .key-p {
+            font-size: 10px;
+            font-weight: bold;
+            color: #00ff88;
+            margin-top: -2px;
+        }
+
+        /* Ajuste para el botón de celular si es necesario o otros elementos */
+    </style>
 
     <!-- Controles Móbiles -->
     <div id="mobileControls">
@@ -678,9 +1404,31 @@
     <!-- Efecto de Velocidad -->
     <div id="speedEffect"></div>
 
+    <!-- Pantalla de Carga -->
+    <div id="loadingScreen">
+        <div class="loading-spinner"></div>
+        <div class="loading-logo">🚗 CHIPEO SIMULATOR 🎵</div>
+        <div class="loading-bar-container">
+            <div class="loading-bar" id="loadingBar"></div>
+        </div>
+        <div class="loading-text" id="loadingText">Cargando modelos 3D...</div>
+    </div>
+
     <div id="musicMenu">
+        <div id="closeBtn" title="Cerrar">✖️</div>
         <h2>🎵 Music Car - Bass Boost Radio 🎵</h2>
-        <input type="text" id="musicUrl" placeholder="Pega aquí el link .mp3 de tu música (Discord, Drive, etc.)">
+
+        <div class="predefined-title">
+            <span>🔥 Canciones del Momento</span>
+            <button id="helpMusicBtn">¿Cómo subir música?</button>
+        </div>
+        <div id="predefinedSongsList" class="predefined-list">
+            <!-- Se llenará con JS -->
+        </div>
+
+        <div class="predefined-title">🔗 Poner link propio (.mp3)</div>
+        <input type="text" id="musicUrl" placeholder="Pega aquí el link .mp3 directo">
+
         <div class="volumeControl">
             <label>Volumen Máximo: <span id="volumeValue">100</span>%</label>
             <input type="range" id="volumeSlider" min="0" max="100" value="100">
@@ -693,10 +1441,9 @@
             <input type="checkbox" id="audio3DCheckbox" style="margin-right: 10px; width: auto;">
             <label for="audio3DCheckbox" style="margin: 0; cursor: pointer;">Activado Audio 3D 🎧</label>
         </div>
-        <div style="text-align: center;">
+        <div style="display: flex; gap: 10px; margin-top: 15px;">
             <button id="playBtn">▶️ Reproducir</button>
-            <button id="stopBtn">⏹️ Detener</button>
-            <button id="closeBtn">✖️ Cerrar</button>
+            <button id="stopBtn" title="Detener">⏹️ Detener</button>
         </div>
         <div class="musicStatus">
             <span id="musicStatusText">No hay música cargada</span>
@@ -704,8 +1451,196 @@
         <div class="bassIndicator">
             🔊 Bass Level: <span id="bassLevel">0</span>%
         </div>
-        <div style="margin-top: 10px; font-size: 12px; color: #888;">
-            💡 Tip: El auto rebota con los bajos de la música 🚗💨
+    </div>
+
+    <!-- Modal de Ayuda para música -->
+    <div id="musicHelpModal">
+        <h3>❓ ¿Cómo subir tu propia música?</h3>
+
+        <p>1. Entra a la página: <a href="https://www.image2url.com/audio-to-link" target="_blank"
+                class="help-link">image2url.com/audio-to-link</a></p>
+
+        <p>2. Presiona el botón <b>"Upload Music"</b> y selecciona tu canción favorita desde tu dispositivo:</p>
+        <img src="https://image2url.com/r2/default/images/1770735376071-91b3ccf4-e441-472e-b5f8-858ae4a35969.png"
+            class="help-step-img">
+
+        <p>3. Después pulsa el botón verde <b>"Upload Audio"</b> para generar el link:</p>
+        <img src="https://image2url.com/r2/default/images/1770735617253-51ed4391-7fe4-4582-8959-b6785d457a52.png"
+            class="help-step-img">
+
+        <p>4. <b>Copia el link</b> que genera la página (el que dice Direct Link):</p>
+        <img src="https://image2url.com/r2/default/images/1770735917436-8cb66573-51b8-409e-a75b-669b36f673b7.png"
+            class="help-step-img">
+
+        <p>5. Finalmente, <b>pégalo en el recuadro</b> de música del auto y dale a reproducir. 🔥</p>
+
+        <button id="closeHelpBtn">¡Entendido, a sonar!</button>
+    </div>
+
+    <!-- 📱 CELULAR AVANZADO -->
+    <div id="phone">
+        <div id="phone-screen">
+            <!-- Header del celular -->
+            <div id="phone-header">
+                <span>ChipeoNet</span>
+                <span id="clock">12:00</span>
+            </div>
+
+            <!-- Pantalla de Inicio -->
+            <div id="home-screen" class="screen-content active">
+                <div class="app-grid">
+                    <div style="text-align: center;">
+                        <div class="app-icon garaje" onclick="openPhoneApp('garaje-screen')">🚗</div>
+                        <div class="app-label">Garaje</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div class="app-icon whapp" onclick="openPhoneApp('whapp-screen')">💬</div>
+                        <div class="app-label">Whapp</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div class="app-icon drone-icon" onclick="openPhoneApp('drone-screen')">🚁</div>
+                        <div class="app-label">Drone</div>
+                    </div>
+                </div>
+            </div>
+
+            <style>
+                .app-icon.drone-icon {
+                    background: linear-gradient(135deg, #00d2ff, #3a7bd5);
+                }
+
+                .drone-controls {
+                    display: grid;
+                    grid-template-columns: repeat(3, 1fr);
+                    gap: 10px;
+                    padding: 20px;
+                    background: rgba(0, 0, 0, 0.5);
+                    border-radius: 15px;
+                    margin: 10px;
+                }
+
+                .drone-btn {
+                    background: #333;
+                    color: white;
+                    border: 1px solid #555;
+                    padding: 10px;
+                    border-radius: 8px;
+                    text-align: center;
+                    font-size: 20px;
+                    cursor: pointer;
+                }
+
+                .drone-btn:active {
+                    background: #555;
+                }
+            </style>
+
+            <!-- App: Garaje -->
+            <div id="garaje-screen" class="screen-content">
+                <div class="app-header">
+                    <span class="back-btn" onclick="openPhoneApp('home-screen')">←</span>
+                    <span>GARAJE</span>
+                    <span style="width: 20px;"></span>
+                </div>
+                <div id="garaje-list" style="flex: 1; overflow-y: auto;">
+                    <!-- Se llenará dinámicamente con los autos disponibles -->
+                </div>
+                <div id="status-msg"></div>
+            </div>
+
+            <!-- App: WhatsApp -->
+            <div id="whapp-screen" class="screen-content">
+                <div class="app-header whapp-header">
+                    <span class="back-btn" onclick="openPhoneApp('home-screen')">←</span>
+                    <span>Whapp</span>
+                    <span style="width: 20px;"></span>
+                </div>
+                <!-- Lista de Contactos (Jugadores Online) -->
+                <div id="contacts-list" style="flex: 1; overflow-y: auto; background: #0b141a;">
+                    <div style="padding: 10px; color: #8696a0; font-size: 11px; text-align: center;">Chats
+                    </div>
+
+                    <!-- Chat por defecto (Grupo Chipeo) -->
+                    <div class="list-item" onclick="openChat('Grupo Chipeo 🚗💨', 'default')">
+                        <span class="icon">💬</span>
+                        <div class="info">
+                            <div class="name">Grupo Chipeo 🚗💨</div>
+                            <div class="status">Viene coro hoy en la avenida? 🔥</div>
+                        </div>
+                    </div>
+
+                    <div style="padding: 10px; color: #8696a0; font-size: 11px; text-align: center;">Jugadores Online
+                    </div>
+                    <div id="whapp-contacts">
+                        <!-- Se llenará dinámicamente con jugadores conectados -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chat Individual (se abre al clickear un contacto) -->
+            <div id="chat-screen" class="screen-content">
+                <div class="app-header whapp-header">
+                    <span class="back-btn" onclick="openPhoneApp('whapp-screen')">←</span>
+                    <span id="chat-contact-name">Contacto</span>
+                    <span style="width: 20px;"></span>
+                </div>
+                <div class="chat-container" id="chat-messages" style="flex: 1; overflow-y: auto; padding-bottom: 10px;">
+                    <!-- Los mensajes se cargarán aquí dinámicamente -->
+                </div>
+
+                <!-- Input de mensajes -->
+                <div style="background: #202c33; padding: 6px 10px; display: flex; gap: 6px; align-items: center;">
+                    <button onclick="sendVoiceNote()"
+                        style="background: #00a884; border: none; border-radius: 50%; width: 36px; height: 36px; min-width: 36px; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">🎤</button>
+                    <input type="text" id="chat-input" placeholder="Mensaje..."
+                        style="flex: 1; padding: 8px 12px; border: none; border-radius: 18px; background: #2a3942; color: white; font-size: 13px; outline: none;"
+                        onkeypress="if(event.key==='Enter') sendMessage()">
+                    <button onclick="sendMessage()"
+                        style="background: #00a884; border: none; border-radius: 50%; width: 36px; height: 36px; min-width: 36px; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">📤</button>
+                </div>
+            </div>
+
+            <!-- App: Drone -->
+            <div id="drone-screen" class="screen-content">
+                <div class="app-header" style="background: #3a7bd5; color: white;">
+                    <span class="back-btn" onclick="openPhoneApp('home-screen')">←</span>
+                    <span>DRONE CAM</span>
+                    <span style="width: 20px;"></span>
+                </div>
+                <div id="drone-status" style="padding: 15px; text-align: center; color: #00d2ff; font-weight: bold;">
+                    SISTEMA LISTO
+                </div>
+                <div
+                    style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; padding: 20px;">
+                    <button id="spawnDroneBtn" onclick="spawnDrone()"
+                        style="width: 80%; padding: 15px; background: #00d2ff; border: none; border-radius: 10px; font-weight: bold; cursor: pointer;">🚁
+                        DESPLEGAR DRONE</button>
+
+                    <div class="drone-controls" id="drone-controls-ui" style="display: none;">
+                        <div class="drone-btn" onclick="droneControl('up')">🔼</div>
+                        <div class="drone-btn" onclick="droneControl('forward')">⬆️</div>
+                        <div class="drone-btn" onclick="droneControl('exit')">❌</div>
+                        <div class="drone-btn" onclick="droneControl('left')">⬅️</div>
+                        <div class="drone-btn" onclick="droneControl('backward')">⬇️</div>
+                        <div class="drone-btn" onclick="droneControl('right')">➡️</div>
+                        <div style="grid-column: span 3; display: flex; justify-content: center;">
+                            <div class="drone-btn" style="width: 33%" onclick="droneControl('down')">🔽</div>
+                        </div>
+                    </div>
+
+                    <div style="color: #aaa; font-size: 11px; text-align: center;">
+                        Controles PC:<br>
+                        W/S: Adelante/Atrás • A/D: Giro<br>
+                        Espacio: Subir • Shift: Bajar<br>
+                        E: Salir del Drone
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer con botón Home -->
+        <div id="phone-footer">
+            <div class="home-btn" onclick="openPhoneApp('home-screen')"></div>
         </div>
     </div>
 
@@ -991,13 +1926,14 @@
         // 🚗 CONFIGURACIÓN DE AUTOS - ¡EDITA AQUÍ!
         // ========================================
         // Para agregar más autos, solo agrega objetos a este array:
+        // NOTA: Los autos se cargan invisibles y aparecen cuando los generas desde el celular
         const carsConfig = [
             {
                 id: 'car1',
                 name: 'El azul',
                 modelUrl: 'https://raw.githubusercontent.com/chipeosimulator/Modelos/main/elazul.glb',
                 position: { x: 0, y: 1.7, z: -10 },
-                rotation: { x: 0, y: -Math.PI / 2, z: 0 }, // -90° para que mire adelante como en la versión anterior
+                rotation: { x: 0, y: -Math.PI / 2, z: 0 },
                 scale: 1.5,
                 audio: car1Audio
             },
@@ -1006,7 +1942,7 @@
                 name: 'La camiona',
                 modelUrl: 'https://raw.githubusercontent.com/chipeosimulator/Modelos/main/LaCamiona.glb',
                 position: { x: 5, y: 2.5, z: -10 },
-                rotation: { x: 0, y: -Math.PI / 2, z: 0 }, // -90° para que mire adelante
+                rotation: { x: 0, y: -Math.PI / 2, z: 0 },
                 scale: 2.4,
                 audio: car2Audio
             },
@@ -1015,7 +1951,7 @@
                 name: 'El neforepi',
                 modelUrl: 'https://raw.githubusercontent.com/chipeosimulator/Modelos/main/Neforepiop.glb',
                 position: { x: 15, y: 1.5, z: -10 },
-                rotation: { x: 0, y: 0, z: 0 }, // Ajustado para que mire hacia adelante
+                rotation: { x: 0, y: 0, z: 0 },
                 scale: 1.5,
                 audio: car3Audio
             },
@@ -1024,7 +1960,7 @@
                 name: 'El dorado',
                 modelUrl: 'https://raw.githubusercontent.com/chipeosimulator/Modelos/main/Eldorado.glb',
                 position: { x: 20, y: 3.5, z: -10 },
-                rotation: { x: 0, y: -Math.PI / 2, z: 0 }, // Ajustado para que mire hacia adelante
+                rotation: { x: 0, y: -Math.PI / 2, z: 0 },
                 scale: 2,
                 audio: car4Audio
             },
@@ -1033,7 +1969,7 @@
                 name: 'El Pebeseta',
                 modelUrl: 'https://raw.githubusercontent.com/chipeosimulator/Modelos/main/Elazulado.glb',
                 position: { x: 25, y: 3.5, z: -10 },
-                rotation: { x: 0, y: -Math.PI / 2, z: 0 }, // Ajustado para que mire hacia adelante
+                rotation: { x: 0, y: -Math.PI / 2, z: 0 },
                 scale: 2,
                 audio: car5Audio
             },
@@ -1042,7 +1978,7 @@
                 name: 'El azulbug',
                 modelUrl: 'https://raw.githubusercontent.com/chipeosimulator/Modelos/main/elazulbugnt.glb',
                 position: { x: 30, y: 3.5, z: -10 },
-                rotation: { x: 0, y: -Math.PI / 2, z: 0 }, // Ajustado para que mire hacia adelante
+                rotation: { x: 0, y: -Math.PI / 2, z: 0 },
                 scale: 2,
                 audio: car6Audio
             },
@@ -1051,20 +1987,10 @@
                 name: 'El Elrojo',
                 modelUrl: 'https://raw.githubusercontent.com/chipeosimulator/Modelos/main/Elrojo.glb',
                 position: { x: 35, y: 2.3, z: -10 },
-                rotation: { x: 0, y: -Math.PI / 2, z: 0 }, // Ajustado para que mire hacia adelante
+                rotation: { x: 0, y: -Math.PI / 2, z: 0 },
                 scale: 1.5,
                 audio: car7Audio
             }
-            // Para agregar más autos, copia y pega este bloque:
-            // {
-            //     id: 'car3',
-            //     name: 'Auto 3',
-            //     modelUrl: 'URL_DEL_MODELO.glb',
-            //     position: { x: 30, y: 0, z: -10 },
-            //     rotation: { x: 0, y: 0, z: 0 },
-            //     scale: 2,
-            //     audio: car3Audio // Necesitas crear car3Audio arriba
-            // }
         ];
 
         // ========================================
@@ -1200,6 +2126,11 @@
         scene.add(controls.getObject());
 
         let isMusicMenuOpen = false;
+        let isDroneMode = false;
+        let activeDroneContainer = null;
+        let droneVelocity = new THREE.Vector3(0, 0, 0);
+        let droneRotationY = 0;
+        let localDronePlayerModel = null; // Modelo para vernos a nosotros mismos desde el drone
         const playerSpeed = 0.15;
 
         const playerRadius = 0.6; // Aumentado el radio de entrada al vehículo
@@ -1207,6 +2138,8 @@
         const moveBackward = { active: false };
         const moveLeft = { active: false };
         const moveRight = { active: false };
+        const moveUp = { active: false };
+        const moveDown = { active: false };
 
 
 
@@ -1355,7 +2288,13 @@
         }
 
         document.addEventListener('click', () => {
-            if (!isMobile && isPlayerMode && !controls.isLocked && !isMusicMenuOpen) {
+            // No bloquear el puntero si no ha hecho login
+            if (!isOnline) return;
+
+            // No bloquear el puntero si estamos en móvil, en auto, o si hay algún menú/celular/mapa abierto
+            const isAnyUIOpen = isMusicMenuOpen || (typeof isPhoneOpen !== 'undefined' && isPhoneOpen) || (typeof isBigMap !== 'undefined' && isBigMap);
+
+            if (!isMobile && isPlayerMode && !controls.isLocked && !isAnyUIOpen) {
                 controls.lock();
             }
         });
@@ -1533,38 +2472,321 @@
         document.getElementById('closeGraphicsBtn').addEventListener('click', closeGraphicsHandler);
         document.getElementById('closeGraphicsBtn').addEventListener('touchstart', closeGraphicsHandler);
 
-        // 5. PISO
-        const floorGeo = new THREE.PlaneGeometry(1000, 1000);
+        // ========================================
+        // 🗺️ MINI-MAPA SYSTEM
+        // ========================================
+        let isBigMap = false;
+        let mapScale = 2;
+        let mapScaleTarget = 2;
+        let mapOffsetX = 0, mapOffsetZ = 0;
+        let isDraggingMap = false;
+        let lastMouseX = 0, lastMouseY = 0;
+        let dragStartDistance = 0;
+        let activeWaypoint = null;
+        let waypointMesh = null;
+
+        const minimapContainer = document.createElement('div');
+        minimapContainer.id = 'minimap-container';
+        minimapContainer.innerHTML = `
+            <canvas id="minimapCanvas"></canvas>
+            <div id="mapControls" style="display:none; position:absolute; bottom:20px; right:20px; gap:10px; flex-direction:column;">
+                <button id="btnZoomIn" style="width:40px; height:40px; background:rgba(255,255,255,0.9); border:none; border-radius:5px; font-weight:bold; font-size:20px; cursor:pointer;">+</button>
+                <button id="btnZoomOut" style="width:40px; height:40px; background:rgba(255,255,255,0.9); border:none; border-radius:5px; font-weight:bold; font-size:20px; cursor:pointer;">-</button>
+            </div>
+            <div id="mapHint" style="display:none; position:absolute; top:20px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.6); color:#fff; padding:8px 15px; border-radius:20px; font-size:14px; white-space:nowrap; pointer-events:none;">
+                Click: Marcar Ruta | Rueda: Zoom | Arrastrar: Mover
+            </div>
+        `;
+        minimapContainer.style.cssText = `
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            border: 4px solid #fff;
+            overflow: hidden;
+            z-index: 1000;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            background: rgba(20, 20, 20, 0.8);
+            display: block; 
+            transition: all 0.3s ease;
+        `;
+
+        document.body.appendChild(minimapContainer);
+        const minimapCanvas = document.getElementById('minimapCanvas');
+        const miniCtx = minimapCanvas.getContext('2d');
+
+        // Forzar resolución inicial para evitar estiramiento
+        minimapCanvas.style.width = '100%';
+        minimapCanvas.style.height = '100%';
+        minimapCanvas.width = 300;
+        minimapCanvas.height = 300;
+
+
+        // Helper para crear marcador y ruta
+        function setWorldWaypoint(x, z) {
+            activeWaypoint = { x, z };
+            if (!waypointMesh) {
+                const geo = new THREE.CylinderGeometry(0.5, 0.5, 200, 16);
+                const mat = new THREE.MeshBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.5 });
+                waypointMesh = new THREE.Mesh(geo, mat);
+                scene.add(waypointMesh);
+            }
+            waypointMesh.position.set(x, 100, z);
+        }
+
+        // Eventos
+        document.getElementById('btnZoomIn').onclick = (e) => { e.stopPropagation(); mapScaleTarget *= 1.5; };
+        document.getElementById('btnZoomOut').onclick = (e) => { e.stopPropagation(); mapScaleTarget *= 0.6; };
+
+        minimapContainer.addEventListener('wheel', (e) => {
+            if (!isBigMap) return;
+            e.preventDefault();
+            e.stopPropagation();
+            const delta = e.deltaY > 0 ? 0.9 : 1.1;
+            mapScaleTarget *= delta;
+        });
+
+        minimapContainer.addEventListener('mousedown', (e) => {
+            if (!isBigMap) return;
+            e.stopPropagation();
+            // Fix: Asegurar que el mouse no se bloquee o liberar si ya está bloqueado
+            if (document.pointerLockElement) document.exitPointerLock();
+
+            isDraggingMap = true;
+            lastMouseX = e.clientX;
+            lastMouseY = e.clientY;
+            dragStartDistance = 0;
+            minimapContainer.style.cursor = 'grabbing';
+        });
+
+        window.addEventListener('mouseup', (e) => {
+            if (!isBigMap || !isDraggingMap) {
+                isDraggingMap = false;
+                return;
+            }
+            isDraggingMap = false;
+            if (minimapContainer) minimapContainer.style.cursor = 'grab';
+
+            // Detección de Click vs Drag (< 5px)
+            if (dragStartDistance < 5) {
+                const rect = minimapCanvas.getBoundingClientRect();
+                const clickX = e.clientX - rect.left - rect.width / 2;
+                const clickY = e.clientY - rect.top - rect.height / 2;
+
+                const scaleFactor = minimapCanvas.width / rect.width;
+                const canvasClickX = clickX * scaleFactor;
+                const canvasClickY = clickY * scaleFactor;
+
+                let playerX = 0, playerZ = 0;
+                if (activeCarContainer) {
+                    playerX = activeCarContainer.position.x;
+                    playerZ = activeCarContainer.position.z;
+                } else {
+                    playerX = camera.position.x;
+                    playerZ = camera.position.z;
+                }
+
+                // Conversión inversa de coordenadas
+                const worldX = (canvasClickX / mapScale) + (playerX + mapOffsetX);
+                const worldZ = (canvasClickY / mapScale) + (playerZ + mapOffsetZ);
+
+                setWorldWaypoint(worldX, worldZ);
+            }
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (!isBigMap || !isDraggingMap) return;
+            e.stopPropagation();
+            const dx = e.clientX - lastMouseX;
+            const dy = e.clientY - lastMouseY;
+            lastMouseX = e.clientX;
+            lastMouseY = e.clientY;
+
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            dragStartDistance += dist;
+
+            mapOffsetX -= dx / (mapScale * 0.5); // Sensibilidad ajustada
+            mapOffsetZ -= dy / (mapScale * 0.5);
+        });
+
+        function updateMinimap() {
+            // Asegurar que el contenedor sea visible
+            if (minimapContainer.style.display === 'none' && !isBigMap) {
+                minimapContainer.style.display = 'block';
+            }
+
+
+            // Interpolación Zoom suave
+            mapScale += (mapScaleTarget - mapScale) * 0.1;
+
+            const targetRes = isBigMap ? 800 : 300;
+            if (minimapCanvas.width !== targetRes) {
+                minimapCanvas.width = targetRes;
+                minimapCanvas.height = targetRes;
+            }
+
+            miniCtx.fillStyle = '#222';
+            miniCtx.fillRect(0, 0, minimapCanvas.width, minimapCanvas.height);
+
+            let playerX = 0, playerZ = 0, playerRot = 0;
+            const dir = new THREE.Vector3();
+
+            if (activeCarContainer) {
+                playerX = activeCarContainer.position.x;
+                playerZ = activeCarContainer.position.z;
+                // Obtener dirección real del frente del auto
+                activeCarContainer.getWorldDirection(dir);
+                // Usamos -dir.z porque en Three.js el frente suele ser -Z
+                playerRot = Math.atan2(dir.x, -dir.z);
+            } else {
+                playerX = camera.position.x;
+                playerZ = camera.position.z;
+                camera.getWorldDirection(dir);
+                // Usamos -dir.z para que mirar al frente (-Z) sea 0 radianes (arriba en el mapa)
+                playerRot = Math.atan2(dir.x, -dir.z);
+            }
+
+            const cx = minimapCanvas.width / 2;
+            const cy = minimapCanvas.height / 2;
+
+            miniCtx.save();
+            miniCtx.translate(cx, cy);
+
+            if (isBigMap) {
+                // Mapa Estático (Norte Arriba)
+                miniCtx.scale(mapScale, mapScale);
+                miniCtx.translate(-(playerX + mapOffsetX), -(playerZ + mapOffsetZ));
+            } else {
+                // Modo Minimapa (Rotativo)
+                // Usamos signo negativo para que el mapa rote en sentido opuesto al jugador
+                miniCtx.rotate(-playerRot);
+                miniCtx.scale(mapScale, mapScale);
+                // Invertimos las coordenadas para que caminar adelante sea "subir" en el mapa
+                miniCtx.translate(-playerX, -playerZ);
+            }
+
+            // DIBUJO
+            miniCtx.fillStyle = '#555';
+            miniCtx.fillRect(-10, -2500, 20, 5000);
+            miniCtx.fillRect(-1000, 90, 2000, 20);
+
+            // Lineas Amarillas
+            miniCtx.fillStyle = '#fd0';
+            miniCtx.beginPath();
+            miniCtx.rect(-0.5, -2500, 1, 5000);
+            miniCtx.fill();
+
+            // Autos
+            Object.values(loadedCars).forEach(car => {
+                if (car.container && car.container !== activeCarContainer) {
+                    miniCtx.fillStyle = '#0bf';
+                    miniCtx.beginPath();
+                    miniCtx.arc(car.container.position.x, car.container.position.z, 8, 0, Math.PI * 2);
+                    miniCtx.fill();
+                }
+            });
+            Object.values(loadedDecorations).forEach(dec => {
+                if (dec.container) {
+                    miniCtx.fillStyle = '#888';
+                    miniCtx.fillRect(dec.container.position.x - 3, dec.container.position.z - 3, 6, 6);
+                }
+            });
+
+            // --- RUTA Y WAYPOINT ---
+            if (activeWaypoint) {
+                // Linea
+                miniCtx.strokeStyle = '#0ff';
+                miniCtx.lineWidth = 4 / mapScale;
+                miniCtx.setLineDash([15 / mapScale, 10 / mapScale]);
+                miniCtx.beginPath();
+                miniCtx.moveTo(playerX, playerZ);
+                miniCtx.lineTo(activeWaypoint.x, activeWaypoint.z);
+                miniCtx.stroke();
+                miniCtx.setLineDash([]);
+
+                // Punto
+                miniCtx.fillStyle = '#0ff';
+                miniCtx.beginPath();
+                miniCtx.arc(activeWaypoint.x, activeWaypoint.z, 15, 0, Math.PI * 2);
+                miniCtx.fill();
+            }
+
+            miniCtx.restore();
+
+            // ICONO PLAYER (Unificado)
+            const playerIconX = isBigMap ? (cx - mapOffsetX * mapScale) : cx;
+            const playerIconY = isBigMap ? (cy - mapOffsetZ * mapScale) : cy;
+            const iconSize = isBigMap ? 1 : 0.6; // Un poco más pequeña en minimapa
+
+            miniCtx.save();
+            miniCtx.translate(playerIconX, playerIconY);
+            if (!isBigMap) {
+                // En minimapa la rotación ya está en el canvas.save general
+                // pero si queremos que la flecha siempre mire al frente relativo al jugador:
+                // miniCtx.rotate(0); 
+            } else {
+                miniCtx.rotate(playerRot);
+            }
+
+            miniCtx.scale(iconSize, iconSize);
+            miniCtx.fillStyle = '#f00';
+            miniCtx.shadowColor = 'black';
+            miniCtx.shadowBlur = 5;
+            miniCtx.beginPath();
+            miniCtx.moveTo(0, -20);
+            miniCtx.lineTo(15, 15);
+            miniCtx.lineTo(0, 10);
+            miniCtx.lineTo(-15, 15);
+            miniCtx.closePath();
+            miniCtx.fill();
+            miniCtx.restore();
+        }
+
+        // ========================================
+        // 🏔️ SISTEMA DE TERRENO Y CARRETERA (ELEVACIÓN)
+        // ========================================
+
+        // 5. PISO (PLANO EXPANDIDO) - Base en Y=0
+        const floorGeo = new THREE.PlaneGeometry(5000, 5000);
         const floorMat = new THREE.MeshStandardMaterial({
             color: 0x5cb85c,
             roughness: 0.8,
         });
         const floor = new THREE.Mesh(floorGeo, floorMat);
         floor.rotation.x = -Math.PI / 2;
+        floor.position.y = 0; // Base
         floor.receiveShadow = true;
         scene.add(floor);
 
-        // CARRETERA
-        const roadGeo = new THREE.PlaneGeometry(20, 1000);
+        // CARRETERA (PLANA) - Elevada 0.1 unidades para evitar Z-fighting
+        const roadGeo = new THREE.PlaneGeometry(20, 5000);
         const roadMat = new THREE.MeshStandardMaterial({
             color: 0x3d3d3d,
             roughness: 0.9,
         });
         const road = new THREE.Mesh(roadGeo, roadMat);
         road.rotation.x = -Math.PI / 2;
-        road.position.y = 0.01;
+        road.position.y = 0.1; // Aumentado de 0.01 a 0.1 para evitar parpadeo
         road.receiveShadow = true;
         scene.add(road);
 
-        // Líneas amarillas
+        // CRUCE - Elevado 0.12 unidades (sobre la carretera)
+        const crossRoad = new THREE.Mesh(new THREE.PlaneGeometry(1000, 20), roadMat);
+        crossRoad.rotation.x = -Math.PI / 2;
+        crossRoad.position.set(0, 0.12, 100); // Aumentado de 0.011 a 0.12
+        crossRoad.receiveShadow = true;
+        scene.add(crossRoad);
+
+        // LÍNEAS AMARILLAS - Elevadas 0.15 unidades (sobre la carretera)
         const lineGeo = new THREE.PlaneGeometry(0.5, 10);
         const lineMat = new THREE.MeshBasicMaterial({ color: 0xffdd00 });
 
-        // ... (Líneas amarillas)
-        for (let i = -50; i < 50; i++) {
+        for (let i = -250; i < 250; i++) {
             const line = new THREE.Mesh(lineGeo, lineMat);
             line.rotation.x = -Math.PI / 2;
-            line.position.set(0, 0.02, i * 20);
+            line.position.set(0, 0.15, i * 20); // Aumentado de 0.02 a 0.15
             scene.add(line);
         }
 
@@ -1942,6 +3164,84 @@
         crearBloque(-1, 0.4, 23, -Math.PI / 2);
 
         // ========================================
+        // 💨 SISTEMA DE HUMO PARA AUTOS
+        // ========================================
+        const smokeParticles = [];
+        const smokeTexture = createSmokeTexture();
+
+        function createSmokeTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 32; canvas.height = 32;
+            const ctx = canvas.getContext('2d');
+            const grad = ctx.createRadialGradient(16, 16, 0, 16, 16, 16);
+            grad.addColorStop(0, 'rgba(100, 100, 100, 0.4)');
+            grad.addColorStop(1, 'rgba(100, 100, 100, 0)');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, 32, 32);
+            return new THREE.CanvasTexture(canvas);
+        }
+
+        const smokeMat = new THREE.SpriteMaterial({
+            map: smokeTexture,
+            color: 0xaaaaaa,
+            transparent: true,
+            depthWrite: false,
+            blending: THREE.NormalBlending
+        });
+
+        function emitSmoke(position) {
+            if (smokeParticles.length > 50) return; // Límite
+
+            const sprite = new THREE.Sprite(smokeMat.clone()); // Clonar para opacidad individual? Sprite comparte material?
+            // SpriteMaterial NO se debe clonar siempre por performance, pero para fade out individual necesitamos manipular opacity.
+            // Opacity está en material. Si comparto material, todos faden igual.
+            // ThreeJS Sprites: opacity is material property.
+            // Si quiero fade individual, necesito materiales clonados.
+            // O usar atributos de instancia/shader custom. 
+            // Para simplicidad (pocos partículas), clonamos material. No es lo más óptimo pero 50 clones es nada.
+
+            sprite.position.copy(position);
+
+            // Random offset
+            sprite.position.x += (Math.random() - 0.5) * 0.2;
+            sprite.position.y += (Math.random() - 0.5) * 0.2;
+
+            const scale = Math.random() * 0.5 + 0.3;
+            sprite.scale.set(scale, scale, 1);
+
+            scene.add(sprite);
+
+            smokeParticles.push({
+                mesh: sprite,
+                life: 1.0,
+                velocity: new THREE.Vector3(
+                    (Math.random() - 0.5) * 0.05,
+                    0.05 + Math.random() * 0.05,
+                    (Math.random() - 0.5) * 0.05
+                )
+            });
+        }
+
+        function updateSmoke() {
+            for (let i = smokeParticles.length - 1; i >= 0; i--) {
+                const p = smokeParticles[i];
+                p.life -= 0.03;
+
+                if (p.life <= 0) {
+                    scene.remove(p.mesh);
+                    if (p.mesh.material) p.mesh.material.dispose(); // Limpiar memoria
+                    smokeParticles.splice(i, 1);
+                    continue;
+                }
+
+                p.mesh.position.add(p.velocity);
+                const s = p.mesh.scale.x + 0.02;
+                p.mesh.scale.set(s, s, 1);
+                p.mesh.material.opacity = p.life;
+            }
+        }
+
+        // ========================================
         // 🚗 CARGA DINÁMICA DE AUTOS
         // ========================================
         // Este sistema carga automáticamente todos los autos del array carsConfig
@@ -2195,13 +3495,63 @@
             });
         }
 
+        // ========================================
+        // 📊 SISTEMA DE PANTALLA DE CARGA
+        // ========================================
+        let totalModelsToLoad = carsConfig.length + decorationsConfig.length;
+        let modelsLoaded = 0;
+
+        function updateLoadingProgress() {
+            const progress = (modelsLoaded / totalModelsToLoad) * 100;
+            const loadingBar = document.getElementById('loadingBar');
+            const loadingText = document.getElementById('loadingText');
+
+            if (loadingBar) loadingBar.style.width = progress + '%';
+            if (loadingText) loadingText.innerText = `Cargando modelos 3D... ${Math.round(progress)}%`;
+
+            // Ocultar pantalla de carga cuando todo esté listo
+            if (modelsLoaded >= totalModelsToLoad) {
+                setTimeout(() => {
+                    const loadingScreen = document.getElementById('loadingScreen');
+                    if (loadingScreen) {
+                        loadingScreen.classList.add('hidden');
+                        // Remover del DOM después de la animación
+                        setTimeout(() => {
+                            loadingScreen.style.display = 'none';
+                        }, 500);
+                    }
+                }, 300);
+            }
+        }
+
         // Iniciar carga de todo
         async function loadEverything() {
             try {
-                // Cargar autos
-                await Promise.all(carsConfig.map(config => loadCarFromConfig(config)));
-                // Cargar decoraciones
-                await Promise.all(decorationsConfig.map(config => loadDecorationFromConfig(config)));
+                // Cargar autos con progreso
+                for (const config of carsConfig) {
+                    try {
+                        await loadCarFromConfig(config);
+                        modelsLoaded++;
+                        updateLoadingProgress();
+                    } catch (error) {
+                        console.error(`Error cargando ${config.name}:`, error);
+                        modelsLoaded++; // Contar incluso si falla
+                        updateLoadingProgress();
+                    }
+                }
+
+                // Cargar decoraciones con progreso
+                for (const config of decorationsConfig) {
+                    try {
+                        await loadDecorationFromConfig(config);
+                        modelsLoaded++;
+                        updateLoadingProgress();
+                    } catch (error) {
+                        console.error(`Error cargando ${config.name}:`, error);
+                        modelsLoaded++; // Contar incluso si falla
+                        updateLoadingProgress();
+                    }
+                }
 
                 document.getElementById('status').innerText = "¡Todo cargado! Presiona F para música";
             } catch (error) {
@@ -2256,6 +3606,10 @@
             // Ocultar menu de login y mostrar panel de jugadores
             document.getElementById('loginMenu').style.display = 'none';
             document.getElementById('playersPanel').style.display = 'block';
+
+            // Mostrar botones de HUD
+            document.getElementById('phoneHudBtn').style.display = 'flex';
+            document.getElementById('discordHudBtn').style.display = 'flex';
 
             // Escuchar cambios en otros jugadores
             setupPlayerListeners();
@@ -2473,9 +3827,12 @@
                 const div = document.createElement('div');
                 div.className = 'player-item' + (playerId === currentPlayerId ? ' self' : '');
 
+                let modeLabel = player.mode === 'player' ? '🚶 Jugador' : '🚗 Auto';
+                if (player.droneActive) modeLabel = '🚁 Drone';
+
                 div.innerHTML = `
-                    <div class="player-name">${player.name}</div>
-                    <div class="player-status">Modo: ${player.mode === 'player' ? '🚶 Jugador' : '🚗 Auto'}</div>
+                    <div class="player-name">${player.name}${player.droneActive ? ' (Drone)' : ''}</div>
+                    <div class="player-status">Modo: ${modeLabel}</div>
                 `;
 
                 playersList.appendChild(div);
@@ -2506,6 +3863,39 @@
             head.castShadow = true;
             head.name = 'playerHead'; // Identificador para controlar visibilidad
             group.add(head);
+
+            // Modelo visual de Drone (invisible por defecto)
+            const droneGroup = new THREE.Group();
+            droneGroup.name = 'droneModel';
+            droneGroup.visible = false;
+            group.add(droneGroup);
+
+            // Placeholder de drone (caja simple) mientras carga
+            const dBoxGeo = new THREE.BoxGeometry(0.8, 0.2, 0.8);
+            const dBoxMat = new THREE.MeshStandardMaterial({ color: 0x333333 });
+            const dBox = new THREE.Mesh(dBoxGeo, dBoxMat);
+            droneGroup.add(dBox);
+
+            // Intentar cargar modelo real de drone
+            loadGLTFWithCache('https://raw.githubusercontent.com/chipeosimulator/Modelos/main/drone.glb').then(gltf => {
+                const model = gltf.scene.clone();
+                model.scale.set(0.5, 0.5, 0.5);
+                model.rotation.y = -Math.PI / 2; // Corregir orientación
+                droneGroup.remove(dBox);
+                droneGroup.add(model);
+            }).catch(err => console.warn("No se pudo cargar modelo de drone para otro jugador", err));
+
+            // Etiqueta con nombre (Drone) - Se mostrará sobre el drone
+            const canvasD = document.createElement('canvas');
+            canvasD.width = 256; canvasD.height = 64;
+            const ctxD = canvasD.getContext('2d');
+            ctxD.fillStyle = 'rgba(0, 0, 0, 0.7)'; ctxD.fillRect(0, 0, 256, 64);
+            ctxD.fillStyle = '#00d2ff'; ctxD.font = 'bold 28px Arial'; ctxD.textAlign = 'center';
+            ctxD.fillText((playerData.name || "Yo") + " (Drone)", 128, 42);
+            const spriteD = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(canvasD) }));
+            spriteD.scale.set(2, 0.5, 1); spriteD.position.y = 1.0;
+            spriteD.name = 'droneNameTag';
+            droneGroup.add(spriteD);
 
             // Etiqueta con nombre
             const canvas = document.createElement('canvas');
@@ -2540,8 +3930,10 @@
                 // Configurar visibilidad inicial
                 const body = model.getObjectByName('playerBody');
                 const head = model.getObjectByName('playerHead');
-                if (body) body.visible = (playerData.mode === 'player');
-                if (head) head.visible = (playerData.mode === 'player');
+                const drone = model.getObjectByName('droneModel');
+                if (body) body.visible = (playerData.mode === 'player' || !!playerData.droneActive);
+                if (head) head.visible = (playerData.mode === 'player' || !!playerData.droneActive);
+                if (drone) drone.visible = !!playerData.droneActive;
 
                 scene.add(model);
                 otherPlayers[playerId] = {
@@ -2558,15 +3950,25 @@
                 // Mostrar/ocultar cuerpo según el modo (el nombre siempre visible)
                 const body = player.model.getObjectByName('playerBody');
                 const head = player.model.getObjectByName('playerHead');
+                const drone = player.model.getObjectByName('droneModel');
                 const nameTag = player.model.getObjectByName('playerNameTag');
 
+                if (drone) {
+                    // La visibilidad se actualiza aquí
+                    drone.visible = !!playerData.droneActive;
+                    // La posición y rotación se interpolan en interpolateOtherPlayers para mayor suavidad
+                }
+
+                // El cuerpo humano SIEMPRE es visible si mode es 'player'
                 if (body) body.visible = (playerData.mode === 'player');
                 if (head) head.visible = (playerData.mode === 'player');
+
                 // nameTag siempre visible
 
                 // Si está en el auto o sentado, ajustar posición del nombre
                 if (nameTag) {
                     if (playerData.mode === 'car') nameTag.position.y = 4;
+                    else if (playerData.mode === 'drone') nameTag.position.y = 1.0;
                     else if (playerData.isSitting) nameTag.position.y = 1.5;
                     else nameTag.position.y = 2.5;
                 }
@@ -2607,12 +4009,20 @@
 
             let posX, posY, posZ, rotation, mode;
 
-            if (isPlayerMode) {
+            if (isDroneMode && localDronePlayerModel) {
+                // Si estamos en drone, usamos la posición ESTATICA del cuerpo que dejamos en el suelo
+                posX = localDronePlayerModel.position.x;
+                posY = localDronePlayerModel.position.y + 1.0; // Compensar el ajuste de spawn
+                posZ = localDronePlayerModel.position.z;
+                rotation = localDronePlayerModel.rotation.y;
+                mode = 'player';
+            } else if (isPlayerMode) {
+                // Posición del CUERPO normal
                 const pos = controls.getObject().position;
                 posX = pos.x;
                 posY = pos.y;
                 posZ = pos.z;
-                rotation = 0;
+                rotation = controls.getObject().rotation.y;
                 mode = 'player';
             } else {
                 // Usar el auto activo (el que realmente estás manejando)
@@ -2647,6 +4057,17 @@
                     isSitting: isSitting,
                     timestamp: now
                 };
+
+                // Añadir datos de drone si está activo
+                if (isDroneMode && activeDroneContainer) {
+                    updateData.droneActive = true;
+                    updateData.dx = Number(activeDroneContainer.position.x.toFixed(2));
+                    updateData.dy = Number(activeDroneContainer.position.y.toFixed(2));
+                    updateData.dz = Number(activeDroneContainer.position.z.toFixed(2));
+                    updateData.dr = Number(droneRotationY.toFixed(2));
+                } else {
+                    updateData.droneActive = false;
+                }
 
                 set(playerRef, updateData);
 
@@ -3054,6 +4475,50 @@
                 }
             }
         });
+
+        // Predefined Songs Array
+        const PREDEFINED_SONGS = [
+            { name: "La Romana", url: "https://image2url.com/r2/default/audio/1770683018499-9c156819-3531-48c2-b2c5-c319315225b0.mp3", icon: "🔥" },
+            { name: "Tokischa", url: "https://image2url.com/r2/bucket1/audio/1766697561680-16659b8f-cb4d-41e4-b53a-2f3f61f888d3.mp3", icon: "💃" },
+            { name: "La 570", url: "https://image2url.com/r2/bucket1/audio/1766691690000-1bb0e2e0-9da8-40a8-8ac6-4b7338d832dd.mp3", icon: "🔊" },
+            { name: "Radio el mmg", url: "https://stream.zeno.fm/anxg4i0klbyvv", icon: "📻" }
+        ];
+
+        function populatePredefinedSongs() {
+            const listContainer = document.getElementById('predefinedSongsList');
+            if (!listContainer) return;
+
+            listContainer.innerHTML = '';
+            PREDEFINED_SONGS.forEach(song => {
+                const btn = document.createElement('button');
+                btn.className = 'song-btn';
+                btn.innerHTML = `<span class="icon">${song.icon}</span> ${song.name}`;
+                btn.onclick = () => {
+                    musicUrl.value = song.url;
+                    playBtn.click();
+                };
+                listContainer.appendChild(btn);
+            });
+        }
+
+        // Llamar para inicializar la lista
+        populatePredefinedSongs();
+
+        // Manejo de Modal de Ayuda
+        const helpMusicBtn = document.getElementById('helpMusicBtn');
+        const musicHelpModal = document.getElementById('musicHelpModal');
+        const closeHelpBtn = document.getElementById('closeHelpBtn');
+
+        if (helpMusicBtn) {
+            helpMusicBtn.onclick = () => {
+                musicHelpModal.style.display = 'block';
+            };
+        }
+        if (closeHelpBtn) {
+            closeHelpBtn.onclick = () => {
+                musicHelpModal.style.display = 'none';
+            };
+        }
 
         playBtn.addEventListener('click', async () => {
             const url = musicUrl.value.trim();
@@ -3627,14 +5092,15 @@
 
         // 7. CONTROLES
         window.addEventListener('keydown', (e) => {
+            if (!isOnline) return; // No permitir controles sin login
             const key = e.key.toLowerCase();
 
             if (key === 'w') moveForward.active = true;
             if (key === 's') moveBackward.active = true;
             if (key === 'a') moveLeft.active = true;
             if (key === 'd') moveRight.active = true;
-
-            if (e.key === 'ArrowUp') moveForward.active = true;
+            if (e.code === 'Space') moveUp.active = true;
+            if (e.key === 'Shift') moveDown.active = true;
             if (e.key === 'ArrowDown') moveBackward.active = true;
             if (e.key === 'ArrowLeft') moveLeft.active = true;
             if (e.key === 'ArrowRight') moveRight.active = true;
@@ -3658,6 +5124,77 @@
                     graphicsMenu.style.display = 'none';
                     coordsDisplay.style.display = 'none'; // Ocultar coordenadas
                     isMusicMenuOpen = false;
+                }
+            }
+
+            if (key === 'm') {
+                const map = document.getElementById('minimap-container');
+                const controls = document.getElementById('mapControls');
+                const hint = document.getElementById('mapHint');
+
+                if (map) {
+                    if (isBigMap) {
+                        // Cerrar Mapa Grande
+                        isBigMap = false;
+                        map.classList.remove('big-map');
+                        map.style.top = '20px'; map.style.left = '20px';
+                        map.style.width = '150px'; map.style.height = '150px';
+                        map.style.borderRadius = '50%';
+                        map.style.transform = 'none';
+                        map.style.border = '4px solid #fff';
+                        map.style.cursor = 'default';
+
+                        // Restaurar posición GTA (abajo por defecto o recordar última J)
+                        if (map.dataset.lastPos === 'top') {
+                            map.style.top = '20px'; map.style.bottom = 'auto';
+                        } else {
+                            map.style.bottom = '20px'; map.style.top = 'auto';
+                        }
+
+                        // Reset
+                        mapScaleTarget = 2;
+                        mapOffsetX = 0; mapOffsetZ = 0;
+                        if (controls) controls.style.display = 'none';
+                        if (hint) hint.style.display = 'none';
+                    } else {
+                        // Abrir Mapa Grande
+                        isBigMap = true;
+
+                        // Desbloquear mouse para poder interactuar con el mapa
+                        if (controls.isLocked) controls.unlock();
+
+                        map.classList.add('big-map');
+                        map.style.top = '50%'; map.style.left = '50%';
+                        map.style.transform = 'translate(-50%, -50%)';
+                        map.style.width = '90vmin'; map.style.height = '90vmin';
+                        map.style.borderRadius = '10px';
+                        map.style.border = '2px solid #aaa';
+                        map.style.cursor = 'grab';
+
+                        // Config inicial big map
+                        mapScaleTarget = 0.5; // Ver más terreno
+                        if (controls) {
+                            controls.style.display = 'flex';
+                            controls.style.flexDirection = 'column';
+                        }
+                        if (hint) hint.style.display = 'block';
+                    }
+                }
+            }
+
+            if (key === 'j') {
+                const map = document.getElementById('minimap-container');
+                if (map && !isBigMap) {
+                    const isBottom = map.getAttribute('data-last-pos') !== 'top' && (map.style.bottom === '20px' || !map.style.top);
+                    if (isBottom) {
+                        map.style.bottom = 'auto';
+                        map.style.top = '20px';
+                        map.setAttribute('data-last-pos', 'top');
+                    } else {
+                        map.style.top = 'auto';
+                        map.style.bottom = '20px';
+                        map.setAttribute('data-last-pos', 'bottom');
+                    }
                 }
             }
 
@@ -3748,7 +5285,7 @@
                 }
             }
 
-            if ((key === 'e' || e.key === 'Enter')) {
+            if ((key === 'e' || key === 'x' || e.key === 'Enter')) {
                 // 1. Manejar Sentado (Prioridad sobre autos)
                 if (isSitting) {
                     standUp();
@@ -3848,6 +5385,9 @@
                             });
                         }
                     }
+                } else if (isDroneMode && activeDroneContainer) {
+                    // Salir del drone
+                    exitDrone();
                 } else if (activeCarContainer) {
                     // 4. Salir del auto
                     isPlayerMode = true;
@@ -3884,6 +5424,8 @@
             if (key === 's') moveBackward.active = false;
             if (key === 'a') moveLeft.active = false;
             if (key === 'd') moveRight.active = false;
+            if (e.code === 'Space') moveUp.active = false;
+            if (e.key === 'Shift') moveDown.active = false;
 
             if (e.key === 'ArrowUp') moveForward.active = false;
             if (e.key === 'ArrowDown') moveBackward.active = false;
@@ -3951,6 +5493,25 @@
 
                     // Reducir velocidad gradualmente
                     player.velocity.multiplyScalar(velocityDecay);
+
+                    // Interpolación del Drone (Suave)
+                    const drone = player.model.getObjectByName('droneModel');
+                    if (drone && drone.visible && player.data.droneActive) {
+                        const targetRelX = (player.data.dx || 0) - player.data.x;
+                        const targetRelY = (player.data.dy || 0) - player.data.y;
+                        const targetRelZ = (player.data.dz || 0) - player.data.z;
+                        const targetRelRot = (player.data.dr || 0) - (player.data.rotation || 0);
+
+                        drone.position.x += (targetRelX - drone.position.x) * lerpFactor;
+                        drone.position.y += (targetRelY - drone.position.y) * lerpFactor;
+                        drone.position.z += (targetRelZ - drone.position.z) * lerpFactor;
+
+                        // Interpolación de rotación normalizada
+                        let rotDiff = targetRelRot - drone.rotation.y;
+                        if (rotDiff > Math.PI) rotDiff -= Math.PI * 2;
+                        if (rotDiff < -Math.PI) rotDiff += Math.PI * 2;
+                        drone.rotation.y += rotDiff * lerpFactor;
+                    }
                 }
             });
 
@@ -4011,6 +5572,12 @@
         // 8. LOOP DE ANIMACIÓN
         function update() {
             requestAnimationFrame(update);
+
+            // Si no hay login, renderizar escena estática pero no procesar lógica
+            if (!isOnline) {
+                renderer.render(scene, camera);
+                return;
+            }
 
             const now = performance.now();
             frameDelta = Math.min(0.05, (now - lastFrameTime) / 1000);
@@ -4198,6 +5765,18 @@
                     activeCarContainer.position.x += sinRot * carSpeed;
                     activeCarContainer.position.z += cosRot * carSpeed;
 
+
+
+                    // HUMO AL MANEJAR
+                    if (Math.abs(carSpeed) > 0.1) {
+                        const smokeOffset = new THREE.Vector3(-1.2, -0.1, -2.5); // Más abajo (negativo local)
+                        smokeOffset.applyAxisAngle(new THREE.Vector3(0, 1, 0), activeCarContainer.rotation.y);
+                        smokeOffset.add(activeCarContainer.position);
+
+                        const chance = (shiftKeyPressed || Math.abs(carSpeed) > 1.0) ? 0.4 : 0.1;
+                        if (Math.random() < chance && typeof emitSmoke === 'function') emitSmoke(smokeOffset);
+                    }
+
                     // Optimizar: reutilizar cálculos trigonométricos
                     const camOffset = new THREE.Vector3(
                         activeCarContainer.position.x - sinRot * 12,
@@ -4226,6 +5805,8 @@
                     document.getElementById('speedEffect').classList.remove('active');
                 }
             }
+            if (typeof updateSmoke === 'function') updateSmoke();
+            if (typeof updateMinimap === 'function') updateMinimap();
 
             // Ocultar barra de nitro cuando estás en modo jugador (si no estás en auto)
             if (isPlayerMode) {
@@ -4251,26 +5832,20 @@
                 updateLODAndVisibility();
             }
 
-            // Actualizar visualización de coordenadas si el menú está abierto
             if (isMusicMenuOpen) {
                 let p;
                 if (isPlayerMode) p = controls.getObject().position;
                 else if (activeCarContainer) p = activeCarContainer.position;
-
-                if (p) {
-                    document.getElementById('coordsDisplay').innerText = `📍 X: ${p.x.toFixed(2)} | Y: ${p.y.toFixed(2)} | Z: ${p.z.toFixed(2)}`;
-                }
+                if (p) document.getElementById('coordsDisplay').innerText = `📍 X: ${p.x.toFixed(2)} | Y: ${p.y.toFixed(2)} | Z: ${p.z.toFixed(2)}`;
             }
 
-            // --- Sincronización Multiplayer ---
             updateMyPosition();
 
+            if (isDroneMode) updateDrone();
             renderer.render(scene, camera);
         }
 
-        // Función para actualizar LOD y visibilidad basado en distancia
         function updateLODAndVisibility() {
-            // Obtener posición del jugador
             let playerPos;
             if (isPlayerMode) {
                 playerPos = controls.getObject().position;
@@ -4405,6 +5980,740 @@
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         };
+
+        // ========================================
+        // 📱 SISTEMA DEL CELULAR AVANZADO
+        // ========================================
+
+        let isPhoneOpen = false;
+
+        // Función para abrir/cerrar el celular
+        window.togglePhone = function () {
+            const phone = document.getElementById('phone');
+            isPhoneOpen = !isPhoneOpen;
+
+            if (isPhoneOpen) {
+                phone.classList.add('active');
+                // Desbloquear controles para poder usar el mouse en el celular
+                if (controls.isLocked) controls.unlock();
+                // Actualizar lista de autos y contactos
+                updateGarajeList();
+                updateWhappContacts();
+            } else {
+                phone.classList.remove('active');
+            }
+        };
+
+        // Navegación entre pantallas del celular
+        window.openPhoneApp = function (screenId) {
+            document.querySelectorAll('.screen-content').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+
+            // Actualizar contenido según la app
+            if (screenId === 'garaje-screen') {
+                updateGarajeList();
+            } else if (screenId === 'whapp-screen') {
+                updateWhappContacts();
+            }
+        };
+
+        // Actualizar lista de autos en el Garaje
+        function updateGarajeList() {
+            const garajeList = document.getElementById('garaje-list');
+            if (!garajeList) return;
+
+            garajeList.innerHTML = '';
+
+            carsConfig.forEach(config => {
+                const item = document.createElement('div');
+                item.className = 'list-item';
+                item.innerHTML = `
+                    <span class="icon">🚗</span>
+                    <div class="info">
+                        <div class="name">${config.name}</div>
+                        <div class="status">Disponible</div>
+                    </div>
+                `;
+                item.onclick = () => spawnCarFromGarage(config);
+                garajeList.appendChild(item);
+            });
+        }
+
+        // Generar auto REAL en el juego - SISTEMA DINÁMICO
+        // Cada vez que se llama, crea una NUEVA instancia del auto
+        window.spawnCarFromGarage = async function (config) {
+            const statusMsg = document.getElementById('status-msg');
+
+            // Verificar que el jugador esté conectado
+            if (!isOnline || !currentPlayerName) {
+                statusMsg.innerText = '⚠️ Debes estar conectado para generar autos';
+                statusMsg.style.color = '#ff4444';
+                setTimeout(() => statusMsg.innerText = '', 3000);
+                return;
+            }
+
+            statusMsg.innerText = `🚗 Generando ${config.name}...`;
+            statusMsg.style.color = '#00ff88';
+
+            try {
+                // Obtener posición del jugador
+                const playerPos = controls.getObject().position;
+
+                // Generar el auto cerca del jugador (5 metros adelante)
+                const spawnDistance = 5;
+                const spawnX = playerPos.x + Math.random() * 2 - 1;
+                const spawnZ = playerPos.z - spawnDistance;
+
+                // CARGAR EL MODELO (usa caché si ya se descargó antes)
+                const cachedGltf = await loadGLTFWithCache(config.modelUrl);
+
+                // CLONAR el modelo para crear una nueva instancia
+                const model = cachedGltf.scene.clone();
+
+                // Optimizar modelo
+                optimizeModel(model);
+
+                // Centrar modelo
+                const box = new THREE.Box3().setFromObject(model);
+                const size = box.getSize(new THREE.Vector3()).length();
+                const center = box.getCenter(new THREE.Vector3());
+
+                model.position.x = -center.x;
+                model.position.z = -center.z;
+                model.position.y = -box.min.y;
+
+                // Aplicar rotación
+                model.rotation.set(config.rotation.x, config.rotation.y, config.rotation.z);
+
+                // Calcular y aplicar escala
+                const scaleFactor = (8 / size) * config.scale;
+                model.scale.set(scaleFactor, scaleFactor, scaleFactor);
+
+                // Crear container para el auto
+                const container = new THREE.Group();
+                container.add(model);
+                container.position.set(spawnX, config.position.y || 1.5, spawnZ);
+                scene.add(container);
+
+                // Generar ID único para este auto
+                const uniqueId = `${config.id}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+                // Guardar en loadedCars con ID único
+                loadedCars[uniqueId] = {
+                    id: uniqueId,
+                    name: config.name,
+                    model: model,
+                    container: container,
+                    baseY: config.position.y || 1.5,
+                    audio: config.audio
+                };
+
+                // Animación de aparición
+                model.scale.set(0.01, 0.01, 0.01);
+                let scaleProgress = 0;
+                const scaleInterval = setInterval(() => {
+                    scaleProgress += 0.15;
+                    model.scale.set(
+                        scaleFactor * scaleProgress,
+                        scaleFactor * scaleProgress,
+                        scaleFactor * scaleProgress
+                    );
+
+                    if (scaleProgress >= 1) {
+                        clearInterval(scaleInterval);
+                        model.scale.set(scaleFactor, scaleFactor, scaleFactor);
+                        statusMsg.innerText = `✅ ${config.name} entregado!`;
+                        setTimeout(() => statusMsg.innerText = '', 2000);
+                    }
+                }, 30);
+
+                console.log(`✅ Auto generado: ${config.name} (ID: ${uniqueId})`);
+
+            } catch (error) {
+                console.error('Error generando auto:', error);
+                statusMsg.innerText = `❌ Error al generar ${config.name}`;
+                statusMsg.style.color = '#ff4444';
+                setTimeout(() => statusMsg.innerText = '', 3000);
+            }
+        };
+
+        // Actualizar lista de contactos en WhatsApp (Jugadores Online)
+        function updateWhappContacts() {
+            const contactsList = document.getElementById('whapp-contacts');
+            if (!contactsList) return;
+
+            // IMPORTANTE: Solo actualizar si la lista está vacía
+            if (contactsList.children.length > 0) {
+                console.log('📱 Lista ya cargada, no se recarga');
+                return;
+            }
+
+            contactsList.innerHTML = '';
+
+            // Agregar jugador actual
+            if (currentPlayerName) {
+                const selfItem = document.createElement('div');
+                selfItem.className = 'list-item';
+                selfItem.style.background = 'rgba(0, 255, 136, 0.2)';
+                selfItem.innerHTML = `
+                    <span class="icon">👤</span>
+                    <div class="info">
+                        <div class="name">${currentPlayerName} (Tú)</div>
+                        <div class="status">En línea</div>
+                    </div>
+                `;
+                contactsList.appendChild(selfItem);
+            }
+
+            // Agregar otros jugadores
+            Object.keys(otherPlayers).forEach(playerId => {
+                const player = otherPlayers[playerId];
+                if (player && player.name) {
+                    const item = document.createElement('div');
+                    item.className = 'list-item';
+
+                    // Determinar estado
+                    const mode = player.mode === 'car' ? '🚗 En auto' : '🚶 Caminando';
+
+                    item.innerHTML = `
+                        <span class="icon">👥</span>
+                        <div class="info">
+                            <div class="name">${player.name}</div>
+                            <div class="status">${mode}</div>
+                        </div>
+                    `;
+
+                    item.onclick = () => openChat(player.name);
+                    contactsList.appendChild(item);
+                }
+            });
+
+            // Si no hay otros jugadores
+            if (Object.keys(otherPlayers).length === 0) {
+                const emptyMsg = document.createElement('div');
+                emptyMsg.style.cssText = 'padding: 20px; text-align: center; color: #8696a0; font-size: 12px;';
+                emptyMsg.innerText = 'No hay otros jugadores conectados';
+                contactsList.appendChild(emptyMsg);
+            }
+        }
+
+        // ========================================
+        // 💬 SISTEMA DE CHAT WHATSAPP
+        // ========================================
+
+        // Variables globales del chat
+        let currentChatId = null;
+        let currentChatName = null;
+
+        // Abrir chat con un contacto
+        window.openChat = function (contactName, chatId) {
+            currentChatName = contactName;
+
+            // Crear chatId único compartido para ambos jugadores
+            if (chatId && chatId !== 'default') {
+                // Ordenar los IDs alfabéticamente para que sea el mismo para ambos
+                const ids = [currentPlayerId, chatId].sort();
+                currentChatId = `chat_${ids[0]}_${ids[1]}`;
+                console.log(`💬 ChatId compartido: ${currentChatId}`);
+            } else {
+                currentChatId = chatId || 'default';
+            }
+
+            document.getElementById('chat-contact-name').innerText = contactName;
+            openPhoneApp('chat-screen');
+
+            // Cargar mensajes del chat
+            loadChatMessages(currentChatId);
+        };
+
+        // Cargar mensajes del chat
+        function loadChatMessages(chatId) {
+            const chatContainer = document.getElementById('chat-messages');
+            if (!chatContainer) return;
+
+            chatContainer.innerHTML = '<div class="chat-date">Hoy</div>';
+
+            // Si es el chat por defecto, mostrar mensajes de ejemplo
+            if (chatId === 'default') {
+                chatContainer.innerHTML += `
+                    <div class="chat-bubble">Oye loco, ¿donde están los filtros pal' bajo?</div>
+                    <div class="chat-bubble sent">En el baúl del Camry, dímelo.</div>
+                    <div class="chat-bubble">Viene coro hoy en la avenida? 🔥</div>
+                `;
+            }
+
+            // Escuchar mensajes en tiempo real desde Firebase
+            const messagesRef = ref(database, `carGame/chats/${chatId}/messages`);
+            onValue(messagesRef, (snapshot) => {
+                const messages = snapshot.val();
+
+                if (messages) {
+                    Object.keys(messages).forEach(msgId => {
+                        const msg = messages[msgId];
+
+                        // Verificar si el mensaje ya existe
+                        if (!document.getElementById(`msg-${msgId}`)) {
+                            addMessageToChat(msg, msgId);
+                        }
+                    });
+                }
+
+                // Scroll al final
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            });
+        }
+
+        // Agregar mensaje al chat
+        function addMessageToChat(msg, msgId) {
+            const chatContainer = document.getElementById('chat-messages');
+            if (!chatContainer) return;
+
+            const messageDiv = document.createElement('div');
+            messageDiv.id = `msg-${msgId}`;
+            messageDiv.className = msg.sender === currentPlayerName ? 'chat-bubble sent' : 'chat-bubble';
+
+            // Si es nota de voz (tiene audioUrl)
+            if (msg.audioUrl) {
+                const audioId = `audio-${msgId}`;
+                messageDiv.innerHTML = `
+                    <div class="voice-note">
+                        <span class="voice-note-icon">🎤</span>
+                        <div class="voice-note-player">
+                            <button class="voice-note-btn" onclick="toggleVoiceNote('${audioId}', this)">▶️</button>
+                            <div class="voice-note-waveform">
+                                <div class="voice-note-progress" id="progress-${audioId}" style="width: 0%"></div>
+                            </div>
+                            <span class="voice-note-duration" id="duration-${audioId}">0:00</span>
+                        </div>
+                        <audio id="${audioId}" src="${msg.audioUrl}" preload="metadata"></audio>
+                    </div>
+                `;
+
+                // Configurar eventos del audio
+                setTimeout(() => {
+                    const audio = document.getElementById(audioId);
+                    const durationSpan = document.getElementById(`duration-${audioId}`);
+                    const progressBar = document.getElementById(`progress-${audioId}`);
+
+                    if (audio) {
+                        audio.addEventListener('loadedmetadata', () => {
+                            const duration = Math.floor(audio.duration);
+                            const mins = Math.floor(duration / 60);
+                            const secs = duration % 60;
+                            durationSpan.innerText = `${mins}:${secs.toString().padStart(2, '0')}`;
+                        });
+
+                        audio.addEventListener('timeupdate', () => {
+                            const progress = (audio.currentTime / audio.duration) * 100;
+                            progressBar.style.width = progress + '%';
+
+                            const remaining = Math.floor(audio.duration - audio.currentTime);
+                            const mins = Math.floor(remaining / 60);
+                            const secs = remaining % 60;
+                            durationSpan.innerText = `${mins}:${secs.toString().padStart(2, '0')}`;
+                        });
+
+                        audio.addEventListener('ended', () => {
+                            const btn = messageDiv.querySelector('.voice-note-btn');
+                            if (btn) btn.innerText = '▶️';
+                            progressBar.style.width = '0%';
+                            const duration = Math.floor(audio.duration);
+                            const mins = Math.floor(duration / 60);
+                            const secs = duration % 60;
+                            durationSpan.innerText = `${mins}:${secs.toString().padStart(2, '0')}`;
+                        });
+                    }
+                }, 100);
+            } else {
+                messageDiv.innerText = msg.text || '';
+            }
+
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        // Función para reproducir/pausar nota de voz
+        window.toggleVoiceNote = function (audioId, button) {
+            const audio = document.getElementById(audioId);
+            if (!audio) return;
+
+            // Pausar todos los otros audios
+            document.querySelectorAll('audio').forEach(a => {
+                if (a.id !== audioId && !a.paused) {
+                    a.pause();
+                    const btn = document.querySelector(`button[onclick*="${a.id}"]`);
+                    if (btn) btn.innerText = '▶️';
+                }
+            });
+
+            if (audio.paused) {
+                audio.play();
+                button.innerText = '⏸️';
+            } else {
+                audio.pause();
+                button.innerText = '▶️';
+            }
+        };
+
+        // Enviar mensaje de texto
+        window.sendMessage = function () {
+            const input = document.getElementById('chat-input');
+            if (!input) return;
+
+            const text = input.value.trim();
+
+            if (!text || !currentChatId) return;
+
+            // Verificar que esté conectado
+            if (!isOnline || !currentPlayerName) {
+                alert('Debes estar conectado para enviar mensajes');
+                return;
+            }
+
+            // Crear mensaje
+            const messageData = {
+                text: text,
+                sender: currentPlayerName,
+                timestamp: Date.now()
+            };
+
+            // Guardar en Firebase (ruta correcta dentro de carGame)
+            const newMessageRef = ref(database, `carGame/chats/${currentChatId}/messages/${Date.now()}`);
+            set(newMessageRef, messageData).then(() => {
+                console.log('✅ Mensaje enviado');
+            }).catch((error) => {
+                console.error('❌ Error enviando mensaje:', error);
+            });
+
+            // Limpiar input
+            input.value = '';
+        };
+
+        // Enviar nota de voz (audio link)
+        window.sendVoiceNote = function () {
+            if (!currentChatId) return;
+
+            // Verificar que esté conectado
+            if (!isOnline || !currentPlayerName) {
+                alert('Debes estar conectado para enviar notas de voz');
+                return;
+            }
+
+            // Pedir link de audio
+            const audioUrl = prompt('Pega el link de tu nota de voz (.mp3, Discord, Drive, etc.):');
+
+            if (!audioUrl || !audioUrl.trim()) return;
+
+            // Crear mensaje de audio
+            const messageData = {
+                audioUrl: audioUrl.trim(),
+                sender: currentPlayerName,
+                timestamp: Date.now()
+            };
+
+            // Guardar en Firebase (ruta correcta dentro de carGame)
+            const newMessageRef = ref(database, `carGame/chats/${currentChatId}/messages/${Date.now()}`);
+            set(newMessageRef, messageData).then(() => {
+                console.log('✅ Nota de voz enviada');
+            }).catch((error) => {
+                console.error('❌ Error enviando nota de voz:', error);
+            });
+        };
+
+        // Reloj en tiempo real
+        function updatePhoneClock() {
+            const clockElement = document.getElementById('clock');
+            if (clockElement) {
+                const now = new Date();
+                const hours = now.getHours().toString().padStart(2, '0');
+                const minutes = now.getMinutes().toString().padStart(2, '0');
+                clockElement.innerText = `${hours}:${minutes}`;
+            }
+        }
+
+        // Actualizar reloj cada segundo
+        setInterval(updatePhoneClock, 1000);
+        updatePhoneClock(); // Actualizar inmediatamente
+
+        // Variable para rastrear jugadores anteriores y evitar parpadeo
+        let previousPlayersList = {};
+
+        // Escuchar cambios en jugadores en tiempo real para WhatsApp
+        const whappPlayersRef = ref(database, 'carGame/players');
+        onValue(whappPlayersRef, (snapshot) => {
+            const players = snapshot.val();
+
+            // Crear hash de jugadores actuales
+            const currentHash = JSON.stringify(players || {});
+            const previousHash = JSON.stringify(previousPlayersList);
+
+            // Solo actualizar si realmente cambió algo Y WhatsApp está abierto
+            if (currentHash !== previousHash && isPhoneOpen && document.getElementById('whapp-screen').classList.contains('active')) {
+                previousPlayersList = players || {};
+
+                const contactsList = document.getElementById('whapp-contacts');
+                if (!contactsList) return;
+
+                contactsList.innerHTML = '';
+
+                // Agregar jugador actual
+                if (currentPlayerName) {
+                    const selfItem = document.createElement('div');
+                    selfItem.className = 'list-item';
+                    selfItem.style.background = 'rgba(0, 255, 136, 0.2)';
+                    selfItem.innerHTML = `
+                        <span class="icon">👤</span>
+                        <div class="info">
+                            <div class="name">${currentPlayerName} (Tú)</div>
+                            <div class="status">En línea</div>
+                        </div>
+                    `;
+                    contactsList.appendChild(selfItem);
+                }
+
+                // Agregar otros jugadores (solo los que están realmente conectados)
+                if (players) {
+                    Object.keys(players).forEach(playerId => {
+                        if (playerId !== currentPlayerId) {
+                            const player = players[playerId];
+
+                            // Verificar que el jugador esté activo (timestamp reciente)
+                            const now = Date.now();
+                            const lastSeen = player.timestamp || 0;
+                            const isActive = (now - lastSeen) < 300000; // 5 minutos
+
+                            if (player && player.name && isActive) {
+                                const item = document.createElement('div');
+                                item.className = 'list-item';
+
+                                const mode = player.mode === 'car' ? '🚗 En auto' : '🚶 Caminando';
+
+                                item.innerHTML = `
+                                    <span class="icon">👥</span>
+                                    <div class="info">
+                                        <div class="name">${player.name}</div>
+                                        <div class="status">${mode}</div>
+                                    </div>
+                                `;
+
+                                item.onclick = () => openChat(player.name, playerId);
+                                contactsList.appendChild(item);
+                            }
+                        }
+                    });
+                }
+
+                // Si no hay otros jugadores activos
+                const activePlayersCount = players ? Object.keys(players).filter(id => {
+                    if (id === currentPlayerId) return false;
+                    const p = players[id];
+                    const now = Date.now();
+                    const lastSeen = p.timestamp || 0;
+                    return (now - lastSeen) < 300000;
+                }).length : 0;
+
+                if (activePlayersCount === 0) {
+                    const emptyMsg = document.createElement('div');
+                    emptyMsg.style.cssText = 'padding: 20px; text-align: center; color: #8696a0; font-size: 12px;';
+                    emptyMsg.innerText = 'No hay otros jugadores conectados';
+                    contactsList.appendChild(emptyMsg);
+                }
+            }
+        });
+
+        // Tecla P para abrir/cerrar celular
+        document.addEventListener('keydown', (e) => {
+            if (!isOnline) return; // No abrir celular sin login
+            if (e.code === 'KeyP' && !isMusicMenuOpen) {
+                togglePhone();
+            }
+        });
+
+        console.log('📱 Sistema de celular inicializado - Presiona P para abrir');
+
+        // ========================================
+        // 🚁 SISTEMA DE DRONE (LOGICA)
+        // ========================================
+
+        window.spawnDrone = async function () {
+            if (!isOnline) {
+                alert("Debes estar online para usar el drone");
+                return;
+            }
+
+            const statusEl = document.getElementById('drone-status');
+            const spawnBtn = document.getElementById('spawnDroneBtn');
+            const controlsUI = document.getElementById('drone-controls-ui');
+
+            // --- EVITAR DUPLICADOS ---
+            if (activeDroneContainer) {
+                scene.remove(activeDroneContainer);
+                activeDroneContainer = null;
+            }
+
+            statusEl.innerText = "🚁 CARGANDO DRONE...";
+            spawnBtn.disabled = true;
+
+            try {
+                const droneUrl = 'https://raw.githubusercontent.com/chipeosimulator/Modelos/main/drone.glb';
+                const cachedGltf = await loadGLTFWithCache(droneUrl);
+                const model = cachedGltf.scene.clone();
+
+                optimizeModel(model);
+
+                // Corregir orientación: ahora mira en la dirección correcta (opuesta al jugador)
+                model.rotation.y = -Math.PI / 2;
+
+                const playerPos = controls.getObject().position;
+                const container = new THREE.Group();
+                container.add(model);
+                container.position.set(playerPos.x, 0.5, playerPos.z - 3);
+
+                // Rotar para que mire al frente inicialmente
+                container.rotation.y = controls.getObject().rotation.y;
+                scene.add(container);
+
+                activeDroneContainer = container;
+                isDroneMode = true;
+                isPlayerMode = false;
+                droneRotationY = container.rotation.y;
+
+                // Cambiar UI del celular
+                spawnBtn.style.display = 'none';
+                controlsUI.style.display = 'grid';
+                statusEl.innerText = "🎮 CONECTADO A DRONE";
+
+                // Liberar controls pointer lock
+                controls.unlock();
+
+                // Switch camera
+                // NO removemos controls.getObject() para que el jugador siga existiendo
+                // pero creamos un modelo visual para que sea visible desde el drone
+                if (localDronePlayerModel) scene.remove(localDronePlayerModel);
+                localDronePlayerModel = createOtherPlayerModel({ name: currentPlayerName || "Yo", mode: 'player' });
+                localDronePlayerModel.position.copy(controls.getObject().position);
+                localDronePlayerModel.position.y -= 1.0; // Ajustar a nivel de suelo
+                localDronePlayerModel.rotation.y = controls.getObject().rotation.y;
+                scene.add(localDronePlayerModel);
+
+                camera.position.set(container.position.x, container.position.y + 2, container.position.z + 5);
+                scene.add(camera);
+
+                console.log("🚁 Drone desplegado y en control");
+
+            } catch (error) {
+                console.error("Error spawn drone:", error);
+                statusEl.innerText = "❌ ERROR DE CONEXIÓN";
+                spawnBtn.disabled = false;
+            }
+        };
+
+        window.exitDrone = function () {
+            if (!isDroneMode || !activeDroneContainer) return;
+
+            isDroneMode = false;
+            isPlayerMode = true;
+
+            const pos = activeDroneContainer.position;
+
+            // Si el drone estaba volando, dejarlo caer al suelo
+            activeDroneContainer.position.y = 0.5;
+
+            scene.remove(camera);
+            // Comentado: No teletransportar al jugador a la posición del drone (el usuario pidió quitarlo)
+            // controls.getObject().position.set(pos.x, 1.7, pos.z);
+
+            // Si controls.getObject() fue removido (por versiones anteriores), lo agregamos de nuevo
+            if (!scene.children.includes(controls.getObject())) {
+                scene.add(controls.getObject());
+            }
+
+            // Limpiar modelo temporal del jugador
+            if (localDronePlayerModel) {
+                scene.remove(localDronePlayerModel);
+                localDronePlayerModel = null;
+            }
+
+            // Remover el drone de la escena al salir (limpieza)
+            scene.remove(activeDroneContainer);
+            activeDroneContainer = null;
+
+            // Reset UI celular
+            document.getElementById('spawnDroneBtn').style.display = 'block';
+            document.getElementById('spawnDroneBtn').disabled = false;
+            document.getElementById('drone-controls-ui').style.display = 'none';
+            document.getElementById('drone-status').innerText = "SISTEMA LISTO";
+
+            activeDroneContainer = null;
+            console.log("🚶 Saliste del drone");
+        };
+
+        window.droneControl = function (action) {
+            if (!isDroneMode) return;
+
+            switch (action) {
+                case 'forward': moveForward.active = true; setTimeout(() => moveForward.active = false, 200); break;
+                case 'backward': moveBackward.active = true; setTimeout(() => moveBackward.active = false, 200); break;
+                case 'left': moveLeft.active = true; setTimeout(() => moveLeft.active = false, 200); break;
+                case 'right': moveRight.active = true; setTimeout(() => moveRight.active = false, 200); break;
+                case 'up': moveUp.active = true; setTimeout(() => moveUp.active = false, 200); break;
+                case 'down': moveDown.active = true; setTimeout(() => moveDown.active = false, 200); break;
+                case 'exit': exitDrone(); break;
+            }
+        };
+
+        function updateDrone() {
+            if (!isDroneMode || !activeDroneContainer) return;
+
+            const drone = activeDroneContainer;
+            const speed = 0.03; // Velocidad ajustada a 0.03 para mayor precisión
+            const rotSpeed = 0.04;
+            const drift = 0.96; // Fricción más suave para vuelo fluido
+
+            // Rotación
+            if (moveLeft.active) droneRotationY += rotSpeed;
+            if (moveRight.active) droneRotationY -= rotSpeed;
+            drone.rotation.y = droneRotationY;
+
+            // Movimiento horizontal
+            const dir = new THREE.Vector3(0, 0, 0);
+            if (moveForward.active) dir.z += speed;
+            if (moveBackward.active) dir.z -= speed;
+
+            dir.applyAxisAngle(new THREE.Vector3(0, 1, 0), droneRotationY);
+            droneVelocity.x += dir.x;
+            droneVelocity.z += dir.z;
+
+            // Vertical
+            if (moveUp.active) droneVelocity.y += speed * 0.5;
+            if (moveDown.active) droneVelocity.y -= speed * 0.5;
+
+            // Aplicar velocidad y fricción
+            drone.position.add(droneVelocity);
+            droneVelocity.multiplyScalar(drift);
+
+            // Límites de suelo
+            if (drone.position.y < 0.2) {
+                drone.position.y = 0.2;
+                droneVelocity.y = 0;
+            }
+
+            // Inclinación visual (Tilt)
+            const tiltX = Math.min(Math.max(droneVelocity.z * 0.2, -0.3), 0.3);
+            const tiltZ = Math.min(Math.max(-droneVelocity.x * 0.2, -0.3), 0.3);
+            drone.children[0].rotation.x = tiltX;
+            drone.children[0].rotation.z = tiltZ;
+
+            // Cámara sigue al drone (más cerca)
+            const camOffset = new THREE.Vector3(
+                -Math.sin(droneRotationY) * 3.5,
+                1.5,
+                -Math.cos(droneRotationY) * 3.5
+            );
+            const targetCamPos = drone.position.clone().add(camOffset);
+            camera.position.lerp(targetCamPos, 0.1);
+            camera.lookAt(drone.position.x, drone.position.y, drone.position.z);
+        }
     </script>
 </body>
 
